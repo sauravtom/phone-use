@@ -21,7 +21,7 @@ from phone_use.core import Phone
 ROOT = Path(__file__).resolve().parents[1]
 
 
-async def run(origin):
+async def run(origin, review=False):
     results = []
     with tempfile.TemporaryDirectory(prefix="phone-relay-") as temp:
         work = Path(temp)
@@ -80,6 +80,36 @@ async def run(origin):
                         await ws.send(json.dumps(reply))
 
                 task = asyncio.create_task(respond())
+                credential = bridge["pairing_code"]
+                if review:
+                    assert origin.startswith("http://127.0.0.1:"), (
+                        "Synthetic review test is local only"
+                    )
+                    credential = os.environ["REVIEW_ACCESS_CODE"]
+                    admin = os.environ["REVIEW_ADMIN_KEY"]
+                    rejected = await client.post(
+                        "/api/review-session", json={"pairing_code": bridge["pairing_code"]}
+                    )
+                    assert rejected.status_code == 401
+                    wrong_admin = await client.post(
+                        "/api/review-session",
+                        json={"pairing_code": bridge["pairing_code"]},
+                        headers={"Authorization": "Bearer wrong"},
+                    )
+                    assert wrong_admin.status_code == 401
+                    bound = await client.post(
+                        "/api/review-session",
+                        json={"pairing_code": bridge["pairing_code"]},
+                        headers={"Authorization": "Bearer " + admin},
+                    )
+                    assert bound.status_code == 200, bound.text
+                    reused = await client.post(
+                        "/api/review-session",
+                        json={"pairing_code": bridge["pairing_code"]},
+                        headers={"Authorization": "Bearer " + admin},
+                    )
+                    assert reused.status_code == 400
+                    results.append("only operator can register a fresh connected reviewer bridge")
                 verifier = secrets.token_urlsafe(48)
                 challenge = (
                     base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
@@ -113,6 +143,23 @@ async def run(origin):
                 )
                 import re
 
+                if review:
+                    bad_handle = re.search('name="handle" value="([^"]+)"', consent.text).group(1)
+                    denied = await client.post(
+                        "/authorize",
+                        data={
+                            "handle": bad_handle,
+                            "pairing_code": "review:incorrect",
+                            "decision": "approve",
+                        },
+                        headers={
+                            "Origin": origin,
+                            "Cookie": consent.headers["set-cookie"].split(";")[0],
+                        },
+                    )
+                    assert denied.status_code != 302 and "unsuccessful" in denied.text
+                    consent = await client.get("/authorize?" + query)
+                    results.append("incorrect reviewer credentials do not receive an OAuth code")
                 handle = re.search('name="handle" value="([^"]+)"', consent.text).group(1)
                 cookie = consent.headers["set-cookie"].split(";")[0]
                 # The local test uses HTTP; explicitly transport the secure consent cookie.
@@ -120,7 +167,7 @@ async def run(origin):
                     "/authorize",
                     data={
                         "handle": handle,
-                        "pairing_code": bridge["pairing_code"],
+                        "pairing_code": credential,
                         "decision": "approve",
                     },
                     headers={"Origin": origin, "Cookie": cookie},
@@ -145,6 +192,32 @@ async def run(origin):
                 assert token_response.status_code == 200, token_response.text
                 token = token_response.json()["access_token"]
                 results.append("OAuth consent, S256 PKCE and token exchange")
+                if review:
+                    # A stable reviewer code must support a fresh browser sign-in.
+                    again = await client.get("/authorize?" + query)
+                    next_handle = re.search('name="handle" value="([^"]+)"', again.text).group(1)
+                    second = await client.post(
+                        "/authorize",
+                        data={
+                            "handle": next_handle,
+                            "pairing_code": credential,
+                            "decision": "approve",
+                        },
+                        headers={
+                            "Origin": origin,
+                            "Cookie": again.headers["set-cookie"].split(";")[0],
+                        },
+                    )
+                    assert second.status_code == 302
+                    next_code = parse_qs(urlparse(second.headers["location"]).query)["code"][0]
+                    next_token = await client.post(
+                        "/oauth/token", data={**token_form, "code": next_code}
+                    )
+                    assert next_token.status_code == 200
+                    token = next_token.json()["access_token"]
+                    results.append(
+                        "review credential supports repeated OAuth sign-in without phone setup"
+                    )
                 auth_headers = {
                     "Authorization": "Bearer " + token,
                     "Accept": "application/json, text/event-stream",
@@ -191,7 +264,7 @@ async def run(origin):
                     "/authorize",
                     data={
                         "handle": handle,
-                        "pairing_code": bridge["pairing_code"],
+                        "pairing_code": credential,
                         "decision": "approve",
                     },
                     headers={"Origin": "https://attacker.invalid"},
@@ -213,7 +286,11 @@ async def run(origin):
                 except asyncio.CancelledError:
                     pass
     report = {"passed": True, "origin": origin, "backend": "fake-adb", "checks": results}
-    output = ROOT / "artifacts/relay-smoke/report.json"
+    output = ROOT / (
+        "artifacts/review-relay-smoke/report.json"
+        if review
+        else "artifacts/relay-smoke/report.json"
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
@@ -222,4 +299,8 @@ async def run(origin):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="http://127.0.0.1:8787")
-    asyncio.run(run(parser.parse_args().url.rstrip("/")))
+    parser.add_argument(
+        "--review", action="store_true", help="Local-only reusable reviewer credential checks"
+    )
+    args = parser.parse_args()
+    asyncio.run(run(args.url.rstrip("/"), args.review))

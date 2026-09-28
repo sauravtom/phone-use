@@ -103,3 +103,30 @@ connection exposed only its paired device and reported a 1080x2400 display.
 The real bridge was revoked after testing. No app inputs were sent, and no
 personal screen image was saved or published. This validates the physical-phone
 connection path only, not the complete interaction workflow or reviewer demo.
+
+### Reviewer demo infrastructure and recording preparation
+
+- Deployed a stateless sample page at https://phone-use.xagi.in/demo. It supports
+  observing a labelled input, typing sample text, pressing Apply and verifying the
+  echoed result. No APK or account is required. HTML escaping and cross-origin POST
+  rejection were checked before deployment.
+- Added private reusable reviewer credentials, separate operator registration of a
+  dedicated emulator bridge, credential-rotation revocation and supervised renewal.
+  Normal phone pairing remains one-time and pinned to its original device.
+- Local reviewer-auth integration tests passed using fake ADB, including bad
+  credentials, repeated OAuth sign-in, operator-only bridge registration, device
+  override rejection and bridge revocation. Normal relay tests passed locally and
+  against production. Cloudflare version: 02244143-d412-4f34-b78a-69d55d33a9bb.
+- Real reusable reviewer OAuth and status passed against the AWS Android 9 emulator.
+  Its complete interaction workflow still fails intermittently: System UI ANRs and
+  UI hierarchy timeouts remain. This is NOT a review-ready full-workflow claim.
+- Added a fixture-only/browser-sample recorder and a renderer that requires a passing
+  MCP workflow and real Android video. Rendering labels the scripted client and 2x
+  playback speed. No successful recording has been produced or published yet.
+- The connected Samsung rejected the optional native test APK install. The browser
+  alternative is prepared, but the last phone observation was a screensaver; user
+  unlock is pending. No personal phone is assigned to the reviewer account.
+
+Reviewer credentials and service environment are private AWS files outside Git.
+The OpenAI draft remains unsubmitted. Do not fill a demo video URL or claim the five
+review cases passed until those results have actually been obtained.
