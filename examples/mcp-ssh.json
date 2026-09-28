@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "phone-use": {
+      "command": "ssh",
+      "args": ["-T", "YOUR_VPS_SSH_ALIAS", "/absolute/path/to/phone-use/.venv/bin/phone-use", "serve"]
+    }
+  }
+}

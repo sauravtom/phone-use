@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "phone-use"
+version = "0.1.0"
+description = "Give your coding agent hands on an Android phone. No API keys."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["mcp>=1.28.1,<2", "defusedxml>=0.7.1,<1", "pydantic>=2.11,<3"]
+
+[project.scripts]
+phone-use = "phone_use.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "ruff>=0.15,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/phone_use"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
