@@ -93,3 +93,13 @@ without sharing OAuth query parameters. The server still rejects null and foreig
 origins. Ruff, all 45 Python tests, npm ci/check, and local and production relay
 smoke tests passed. Cloudflare version: 17fa9583-83f8-450d-95a6-a1a572ade93c.
 These relay checks use fake ADB and do not replace real-device workflow validation.
+
+### Physical-phone connection smoke test
+
+A user-connected Samsung SM-G985F running Android 13 was reachable from the AWS
+checkout through a temporary SSH tunnel to the Mac's USB ADB server. MCP stdio
+and the production HTTPS relay both passed device/status checks; the hosted
+connection exposed only its paired device and reported a 1080x2400 display.
+The real bridge was revoked after testing. No app inputs were sent, and no
+personal screen image was saved or published. This validates the physical-phone
+connection path only, not the complete interaction workflow or reviewer demo.
