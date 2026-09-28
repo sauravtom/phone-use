@@ -5,6 +5,7 @@ import asyncio
 import base64
 import json
 import sys
+from pathlib import Path
 
 from pydantic import ValidationError
 
@@ -38,6 +39,7 @@ def main() -> None:
     call = sub.add_parser("call", help="Call a tool with JSON arguments")
     call.add_argument("tool", choices=COMMANDS)
     call.add_argument("arguments", nargs="?", default="{}", help="JSON object; use - for stdin")
+    call.add_argument("--output", type=Path, help="Save screenshot PNG to this file")
     args = parser.parse_args()
     if args.command == "serve":
         from .server import serve
@@ -62,13 +64,19 @@ def main() -> None:
             )
         )
         return
+    if args.output and args.tool != "screenshot":
+        parser.error("--output is supported only for screenshot")
     try:
         payload = json.loads(sys.stdin.read() if args.arguments == "-" else args.arguments)
         if not isinstance(payload, dict):
             raise ValueError("Arguments must be a JSON object.")
         result = getattr(phone, args.tool)(**payload)
         if isinstance(result, bytes):
-            result = {"mimeType": "image/png", "data": base64.b64encode(result).decode()}
+            if args.output:
+                args.output.write_bytes(result)
+                result = {"mimeType": "image/png", "path": str(args.output.resolve())}
+            else:
+                result = {"mimeType": "image/png", "data": base64.b64encode(result).decode()}
         print(json.dumps(result, ensure_ascii=False))
     except ValidationError:
         print(
@@ -78,6 +86,6 @@ def main() -> None:
             file=sys.stderr,
         )
         raise SystemExit(1) from None
-    except (PhoneError, ValueError, TypeError) as exc:
+    except (PhoneError, ValueError, TypeError, OSError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         raise SystemExit(1) from None

@@ -54,11 +54,31 @@ def main():
         return 1
     command = shlex.split(args[3])
     if command[:2] == ["uiautomator", "dump"]:
+        history = [
+            json.loads(line) for line in Path(os.environ["FAKE_ADB_LOG"]).read_text().splitlines()
+        ]
+        dumps = sum(1 for args in history if len(args) > 3 and "uiautomator dump" in args[3])
+        if os.environ.get("FAKE_ADB_MODE") == "flaky_root" and dumps == 1:
+            Path(os.environ["FAKE_XML"] + ".missing").touch()
+            return 0
+        if os.environ.get("FAKE_ADB_MODE") == "null_root" or (
+            os.environ.get("FAKE_ADB_MODE") == "compressed_null" and "--compressed" in command
+        ):
+            Path(os.environ["FAKE_XML"] + ".missing").touch()
+            print("ERROR: null root node returned by UiTestAutomationBridge.", file=sys.stderr)
+            return 0
         print("UI hierarchy dumped to: " + command[-1])
     elif command[0] == "cat":
+        if (
+            os.environ.get("FAKE_ADB_MODE") == "null_root"
+            or Path(os.environ["FAKE_XML"] + ".missing").exists()
+        ):
+            return 1
         print(Path(os.environ["FAKE_XML"]).read_text())
     elif command[:2] == ["rm", "-f"]:
-        pass
+        Path(os.environ["FAKE_XML"] + ".missing").unlink(missing_ok=True)
+    elif command == ["getprop", "sys.boot_completed"]:
+        print(os.environ.get("FAKE_BOOT_COMPLETED", "1"))
     elif command == ["getprop", "ro.build.version.release"]:
         print("11")
     elif command[:3] == ["pm", "list", "packages"]:

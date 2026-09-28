@@ -60,3 +60,19 @@ phone-use has a clear narrower purpose. An optional backend adapter can be consi
 later; it should not silently add cloud credentials or auto-install a Portal app.
 
 No reference source was copied. Both implementations remain in separate repositories.
+
+## AWS runtime evidence
+
+The local Python API was exercised with an empty environment apart from PATH against
+an Android 9 software emulator, without Portal or cloud credentials. With
+`backend="local-android-adb"`, `device.ui()` returned 10 nodes and `device.screenshot()`
+returned a valid PNG. This verifies the local keyless read path on that test device;
+it does not establish iOS, cloud, or physical-phone compatibility.
+
+Early runs encountered a boot crash (Android 11 image), a System UI ANR (Android 9),
+and unavailable accessibility roots. Comparing against mobile-harness helped find a
+phone-use compatibility problem: its compressed UI dump returned a null root on the
+fixture, while the standard dump succeeded. phone-use now uses standard dumps and
+filters the resulting XML itself. Standard dumps could also fail transiently; the
+read path now retries a missing root once without retrying input actions. Regression
+tests cover unsupported compressed trees and bounded recovery from missing roots. Single-run timings on software emulation are not a benchmark.

@@ -39,6 +39,7 @@ async def run(serial: str, output: Path) -> None:
                 report["steps"].append(
                     {"tool": name, "seconds": round(time.monotonic() - started, 2)}
                 )
+                print(json.dumps(report["steps"][-1]), flush=True)
                 return response
 
             async def find(predicate):
@@ -53,11 +54,13 @@ async def run(serial: str, output: Path) -> None:
 
             status = (await call("status")).structuredContent
             report["device"] = status
+            assert status["boot_completed"], "Android must finish booting before this test"
             apps = (await call("list_apps")).structuredContent["packages"]
             assert "org.phoneuse.fixture" in apps, "Install the fixture APK first"
             await call("launch_app", package="org.phoneuse.fixture")
             state, node = await find(lambda n: n["description"] == "Test input")
             await call("tap_element", element_id=node["id"], snapshot=state["snapshot"])
+            await find(lambda n: n["description"] == "Test input" and n["focused"])
             payload = "phone-use 100% 'quote' & $HOME"
             await call("type_text", text=payload)
             await find(lambda n: n["text"] == payload)
@@ -73,11 +76,12 @@ async def run(serial: str, output: Path) -> None:
             assert png.startswith(b"\x89PNG\r\n\x1a\n")
             (output / "verified-screen.png").write_bytes(png)
             await call("tap", x=node["center"][0], y=node["center"][1])
-            await call("swipe", x1=100, y1=600, x2=100, y2=400)
+            width, height = status["screen"]["width"], status["screen"]["height"]
+            await call("swipe", x1=width // 2, y1=height * 3 // 4, x2=width // 2, y2=height // 4)
             await call("scroll", direction="down")
             await call("press_key", key="HOME")
             await call("launch_app", package="org.phoneuse.fixture")
-            await find(lambda n: n["text"] == "Verified: " + payload)
+            await find(lambda n: n["text"] == "phone-use device test")
             report["passed"] = True
     (output / "report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))

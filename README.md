@@ -98,14 +98,19 @@ printf '%s' '{"text":"hello world"}' | phone-use call type_text -
 ```
 
 CLI screenshot returns JSON with base64 PNG data; MCP returns an image content block.
-No screenshots or text are saved by phone-use. Your MCP client can retain tool results.
+To save a CLI screenshot for your agent's image viewer, use
+`phone-use call screenshot --output /tmp/phone-screen.png`.
+phone-use does not save screenshots or UI text on the host by default. UI inspection
+uses a temporary XML file on Android and attempts to remove it after each read;
+an interrupted connection can leave that file behind. Your MCP client can retain tool results.
 
 ## Limits and trust
 
 - USB/wireless debugging requires device owner authorization. This does not bypass
   lock screens, app authentication, permissions, or Android secure-screen protections.
 - UI inspection uses Android's built-in `uiautomator dump`; it can take several seconds,
-  fail during animations, or omit custom canvas/game content. Screenshots are the fallback.
+  fail during animations, or omit custom canvas/game content. A missing root is retried
+  once; screenshots are the fallback. Input actions are never retried automatically.
 - Snapshot checks reduce stale element actions but cannot make Android UI changes atomic.
   Dynamic screens may require a fresh screenshot and coordinate tap.
 - Coordinates use the original PNG pixels. If your agent resizes an image, map coordinates
@@ -131,7 +136,8 @@ uv build
 Tests include transport failures, device selection, shell quoting, UI parsing, stale
 snapshots, action validation, and a real MCP client/server session against a fake ADB
 process. An opt-in emulator smoke test is documented in [testing](docs/testing.md).
-Mocked tests alone do not establish physical-phone compatibility.
+Mocked tests alone do not establish physical-phone compatibility. See [validation results](DONE.md)
+for the actual AWS emulator run and current limits.
 
 ## Inspiration
 

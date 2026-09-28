@@ -4,6 +4,7 @@ import hashlib
 import re
 import struct
 import threading
+import time
 import uuid
 from typing import Annotated, Any, Literal
 
@@ -78,6 +79,10 @@ def parse_tree(xml: str) -> list[dict]:
     return elements
 
 
+class HierarchyUnavailable(PhoneError):
+    """Android could not expose a current accessibility root."""
+
+
 class Phone:
     def __init__(self, adb: Adb | None = None):
         self.adb = adb or Adb()
@@ -88,12 +93,29 @@ class Phone:
         return {"devices": self.adb.devices()}
 
     def _tree(self, serial: str) -> tuple[str, list[dict]]:
+        # UIAutomator can briefly lose its root across connection/window transitions.
+        # Retry the read once; never retry input actions automatically.
+        try:
+            return self._read_tree(serial)
+        except HierarchyUnavailable:
+            time.sleep(1)
+            return self._read_tree(serial)
+
+    def _read_tree(self, serial: str) -> tuple[str, list[dict]]:
         path = f"/data/local/tmp/phone-use-{uuid.uuid4().hex}.xml"
         try:
-            result = self.adb.shell(serial, "uiautomator", "dump", "--compressed", path)
+            result = self.adb.shell(serial, "uiautomator", "dump", path)
             if "ERROR" in result:
-                raise PhoneError("UI hierarchy unavailable. Try phone_screenshot for this app.")
-            xml = self.adb.shell(serial, "cat", path)
+                raise HierarchyUnavailable(
+                    "UI hierarchy unavailable. Try phone_screenshot for this app."
+                )
+            try:
+                xml = self.adb.shell(serial, "cat", path)
+            except PhoneError as exc:
+                raise HierarchyUnavailable(
+                    "Android did not produce a UI hierarchy. Check phone_status; "
+                    "if connected, use phone_screenshot and coordinate actions."
+                ) from exc
             nodes = parse_tree(xml)
             snapshot = hashlib.sha256((serial + "\0" + xml).encode()).hexdigest()
             return snapshot, nodes
@@ -261,11 +283,21 @@ class Phone:
         with self.lock:
             device = self.adb.resolve(serial)
             version = self.adb.shell(device, "getprop", "ro.build.version.release")
+            booted = self.adb.shell(device, "getprop", "sys.boot_completed") == "1"
+            if not booted:
+                return {
+                    "serial": device,
+                    "platform": "android",
+                    "android_version": version,
+                    "boot_completed": False,
+                    "hint": "ADB is connected but Android is still booting. Wait before actions.",
+                }
             width, height = struct.unpack(">II", self._png(device)[16:24])
             return {
                 "serial": device,
                 "platform": "android",
                 "android_version": version,
+                "boot_completed": True,
                 "screen": {"width": width, "height": height},
                 "capabilities": {
                     "ui_tree": "best_effort",

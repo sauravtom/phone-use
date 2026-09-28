@@ -201,3 +201,62 @@ def test_adb_cannot_consume_agent_stdin(fake, monkeypatch):
     )
     assert result.returncode == 0
     assert "test-phone" in result.stdout
+
+
+def test_status_distinguishes_connected_from_booted(fake, monkeypatch):
+    phone, _, log = fake
+    monkeypatch.setenv("FAKE_BOOT_COMPLETED", "")
+    result = phone.status()
+    assert result["boot_completed"] is False
+    assert "still booting" in result["hint"]
+    assert not any("screencap" in args for args in calls(log))
+
+
+def test_cli_screenshot_file_and_output_validation(fake, tmp_path):
+    _, _, log = fake
+    exe = str(__import__("pathlib").Path(sys.executable).with_name("phone-use"))
+    output = tmp_path / "screenshot.png"
+    bad = subprocess.run(
+        [exe, "call", "press_key", '{"key":"HOME"}', "--output", str(output)],
+        capture_output=True,
+        text=True,
+    )
+    assert bad.returncode != 0
+    assert not calls(log)
+    result = subprocess.run(
+        [exe, "call", "screenshot", "--output", str(output)], capture_output=True, text=True
+    )
+    assert result.returncode == 0
+    assert output.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+    assert '"path"' in result.stdout and '"data"' not in result.stdout
+
+
+def test_null_accessibility_root_guides_to_vision(fake, monkeypatch):
+    phone, _, log = fake
+    monkeypatch.setenv("FAKE_ADB_MODE", "null_root")
+    with pytest.raises(PhoneError, match="phone_screenshot"):
+        phone.observe()
+    assert shell_calls(log)[-1][:2] == ["rm", "-f"]
+    assert phone.screenshot().startswith(b"\x89PNG")
+
+
+def test_device_without_compressed_tree_support(fake, monkeypatch):
+    phone, _, _ = fake
+    monkeypatch.setenv("FAKE_ADB_MODE", "compressed_null")
+    assert phone.observe()["elements"][0]["text"] == "Settings"
+
+
+def test_transient_null_root_recovers_with_one_read_retry(fake, monkeypatch):
+    phone, _, log = fake
+    monkeypatch.setenv("FAKE_ADB_MODE", "flaky_root")
+    assert phone.observe()["elements"][0]["text"] == "Settings"
+    assert sum(c[:2] == ["uiautomator", "dump"] for c in shell_calls(log)) == 2
+
+
+def test_persistent_null_root_retry_is_bounded(fake, monkeypatch):
+    phone, _, log = fake
+    monkeypatch.setenv("FAKE_ADB_MODE", "null_root")
+    with pytest.raises(PhoneError, match="phone_screenshot"):
+        phone.observe()
+    assert sum(c[:2] == ["uiautomator", "dump"] for c in shell_calls(log)) == 2
+    assert not any(c[0] == "input" for c in shell_calls(log))

@@ -29,7 +29,7 @@ For a repeat run, clear **only the disposable fixture** first:
 
 The smoke test creates a real MCP client/server connection with model/API credentials
 removed from its child environment. It verifies launch, UI observation, snapshot-checked
-element taps, exact text entry (including shell punctuation), native PNG output,
+element taps, input focus readiness, exact text entry (including shell punctuation), native PNG output,
 coordinate actions, navigation and returning to the app. It saves a report, UI tree and
 screenshot under ignored `artifacts/device-smoke/`. Swipe/scroll dispatch is tested on
 the fixture; list scrolling success needs a scrollable app and separate observation.
