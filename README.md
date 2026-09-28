@@ -16,9 +16,11 @@ Install [Android platform-tools](https://developer.android.com/tools/releases/pl
 enable USB debugging, connect an unlocked phone, and accept its debugging authorization.
 Use an emulator if you do not want to use a personal device.
 
-From this repository:
+Clone the repository, then install with [uv](https://docs.astral.sh/uv/):
 
 ```sh
+git clone https://github.com/sauravtom/phone-use.git
+cd phone-use
 uv sync --locked
 adb devices -l
 uv run --locked phone-use call devices

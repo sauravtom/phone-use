@@ -41,5 +41,6 @@ Swipe/scroll dispatch was exercised on a static fixture; content movement on rea
 scrollable apps needs separate testing. Physical devices, wireless debugging, Android
 versions beyond this emulator, iOS and Unicode entry are not verified here. iOS and
 Unicode are intentionally unsupported in v0.1. This is an initial open-source MVP,
-not a production compatibility certification. No public repository or PyPI release
-has been published as part of this work.
+not a production compatibility certification. The public source repository is
+[github.com/sauravtom/phone-use](https://github.com/sauravtom/phone-use).
+No PyPI release has been published.
