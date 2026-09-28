@@ -66,7 +66,8 @@ No PyPI release has been published.
 - An OpenAI directory draft exists with metadata, prompts, release notes and five
   positive/three negative review cases. It has NOT been submitted, approved or listed.
   The skill ZIP passed the portal scan; both icons and review JSON were uploaded.
-  Browser OAuth verification remains in progress. A durable reviewer demo and
+  Browser OAuth completed successfully and the portal scanned all 13 tools.
+  Imported annotation justifications are populated. A durable reviewer demo and
   Developer Mode demo recording remain outstanding. The current short-lived pairing
   code must not be represented as a permanent reviewer login. Final terms and policy
   attestations have not been accepted.
