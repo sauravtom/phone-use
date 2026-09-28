@@ -1,0 +1,45 @@
+{
+  "name": "phone-use",
+  "version": "0.1.0",
+  "description": "Control an authorized Android phone or emulator from your coding agent, without API keys.",
+  "author": {
+    "name": "Saurav Kumar Tomar",
+    "url": "https://github.com/sauravtom"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "phone-use",
+    "shortDescription": "Control your Android phone",
+    "longDescription": "Connect an authorized Android phone or emulator to your coding agent. Inspect screens, navigate apps, tap, swipe, enter ASCII text, and verify results. The hosted MCP endpoint uses OAuth and a one-time code from the phone-use bridge running beside your ADB installation. Each connection controls one device, for at most eight hours. No model API key, companion APK, or root is needed. Requires Python 3.11+, uv, ADB, and an authorized device on the bridge host. Screenshots and UI data pass through Cloudflare to your agent provider. The bundled skill also supports the local CLI and stdio MCP server. Android only; Unicode input is unsupported.",
+    "developerName": "Saurav Kumar Tomar",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Inspect Android screens",
+      "Navigate and operate Android apps",
+      "Verify mobile workflows"
+    ],
+    "websiteURL": "https://phone-use.xagi.in",
+    "defaultPrompt": [
+      "Use phone-use to list my connected Android devices.",
+      "Use phone-use to open Settings and report the Android version.",
+      "Use phone-use to inspect the current screen and describe the available actions."
+    ],
+    "brandColor": "#156F78",
+    "composerIcon": "./assets/phone-use.png",
+    "logo": "./assets/phone-use.png",
+    "privacyPolicyURL": "https://phone-use.xagi.in/privacy",
+    "termsOfServiceURL": "https://phone-use.xagi.in/terms"
+  },
+  "homepage": "https://github.com/sauravtom/phone-use",
+  "repository": "https://github.com/sauravtom/phone-use",
+  "license": "MIT",
+  "keywords": [
+    "android",
+    "adb",
+    "phone",
+    "mobile",
+    "testing",
+    "mcp"
+  ],
+  "mcpServers": "./.mcp.json"
+}

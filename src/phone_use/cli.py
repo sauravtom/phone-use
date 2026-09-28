@@ -35,12 +35,29 @@ def main() -> None:
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("serve", help="Run the MCP server over stdio")
+    connect = sub.add_parser("connect", help="Pair one device with a hosted MCP relay")
+    connect.add_argument("--server", default="https://phone-use.xagi.in")
+    connect.add_argument("--serial", required=True, help="Authorize only this ADB device")
     sub.add_parser("tools", help="Print available tool names and descriptions")
     call = sub.add_parser("call", help="Call a tool with JSON arguments")
     call.add_argument("tool", choices=COMMANDS)
     call.add_argument("arguments", nargs="?", default="{}", help="JSON object; use - for stdin")
     call.add_argument("--output", type=Path, help="Save screenshot PNG to this file")
     args = parser.parse_args()
+    if args.command == "connect":
+        from .bridge import run_bridge
+
+        try:
+            asyncio.run(run_bridge(args.server, args.serial))
+        except KeyboardInterrupt:
+            print("Phone bridge disconnected.", file=sys.stderr)
+        except Exception:
+            print(
+                "Bridge unavailable. Check the relay URL, network, and authorized ADB device.",
+                file=sys.stderr,
+            )
+            raise SystemExit(1) from None
+        return
     if args.command == "serve":
         from .server import serve
 

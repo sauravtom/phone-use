@@ -14,3 +14,8 @@ Validate changes with `uv run ruff check .` and `uv run pytest -q`.
 Use `docs/testing.md` for optional device checks; never substitute mock success for a
 verified device workflow. Do not touch a personal device without task authorization.
 Keep Android SDKs, build outputs, screenshots, and signing keys outside tracked source.
+
+Hosted relay changes also require `cd cloudflare && npm ci && npm run check`.
+Run `scripts/relay-smoke.py` against a local Wrangler instance before deployment;
+verify the production origin after deployment. The relay must require OAuth for MCP
+and never allow a bridge to dispatch to a serial other than its pinned device.

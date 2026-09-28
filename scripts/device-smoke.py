@@ -7,16 +7,37 @@ import json
 import os
 import sys
 import time
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from pathlib import Path
 
+import httpx
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.client.streamable_http import streamable_http_client
 
 
-async def run(serial: str, output: Path) -> None:
+@asynccontextmanager
+async def connection(params, url=None, token=None):
+    if url:
+        async with httpx.AsyncClient(
+            headers={"Authorization": "Bearer " + token}, timeout=120
+        ) as http:
+            async with streamable_http_client(url, http_client=http) as (read, write, _):
+                yield read, write
+    else:
+        async with stdio_client(params) as streams:
+            yield streams
+
+
+async def run(serial: str, output: Path, url=None, token=None) -> None:
     output.mkdir(parents=True, exist_ok=True)
-    report = {"serial": serial, "steps": [], "transport": "MCP stdio", "passed": False}
+    report = {
+        "serial": serial,
+        "steps": [],
+        "transport": "MCP HTTPS relay" if url else "MCP stdio",
+        "passed": False,
+    }
     env = {
         k: v
         for k, v in os.environ.items()
@@ -25,7 +46,7 @@ async def run(serial: str, output: Path) -> None:
     params = StdioServerParameters(
         command=str(Path(sys.executable).with_name("phone-use")), args=["serve"], env=env
     )
-    async with stdio_client(params) as (read, write):
+    async with connection(params, url, token) as (read, write):
         async with ClientSession(
             read, write, read_timeout_seconds=timedelta(seconds=120)
         ) as client:

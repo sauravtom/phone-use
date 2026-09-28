@@ -43,7 +43,11 @@ def create_server(phone: Phone | None = None) -> FastMCP:
             ),
         )
 
-    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False))
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=True
+        )
+    )
     def phone_screenshot(serial: Serial = None) -> Image:
         """Return a native-resolution PNG image. Use these pixels for coordinate actions."""
         return Image(data=phone.screenshot(serial), format="png")

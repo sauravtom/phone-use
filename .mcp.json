@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "phone-use": {
+      "type": "http",
+      "url": "https://phone-use.xagi.in/mcp"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "phone-use"
+  short_description: "Control an authorized Android phone or emulator"
+  default_prompt: "Use $phone-use to inspect my connected Android device."

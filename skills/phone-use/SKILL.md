@@ -7,7 +7,23 @@ description: Control an authorized Android phone or emulator with phone-use MCP 
 
 Use the phone-use MCP tools when installed. Otherwise use `phone-use call TOOL 'JSON'`;
 CLI names omit the `phone_` prefix. Run `phone-use tools` to inspect the available commands.
-The executable must already be installed and ADB must reach an authorized Android device.
+If the CLI is not on PATH, use this skill's bundled launcher. Resolve the absolute path
+of `scripts/phone_use.py` relative to this SKILL.md (do not guess the installation path):
+
+```sh
+python3 /absolute/path/to/skills/phone-use/scripts/phone_use.py tools
+python3 /absolute/path/to/skills/phone-use/scripts/phone_use.py call devices
+```
+
+Replace `phone-use` in the examples below with that launcher when needed. It uses Python
+3.11+ and `uv` to install locked dependencies in `~/.cache/phone-use/` on first use;
+installation may need network access. It does not install ADB, start an emulator, or
+connect to arbitrary devices. ADB must already reach an authorized Android device.
+If prerequisites or a local execution environment are missing, explain the missing
+requirement and link https://github.com/sauravtom/phone-use#quick-start. For the hosted
+MCP connection, the user runs `phone-use connect --serial SERIAL` on their ADB host
+and enters its one-time code in the OAuth consent page. A web-only chat can then use
+the paired relay. Installing the skill alone does not connect a phone.
 No model API keys or separate agent service are needed.
 
 Discover with `phone_devices`. Keep using the same explicit serial if multiple devices

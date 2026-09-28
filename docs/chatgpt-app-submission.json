@@ -1,0 +1,217 @@
+{
+  "$schema": "https://developers.openai.com/plugins/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "phone-use",
+    "subtitle": "Control your Android phone",
+    "description": "Connect an authorized Android phone or emulator to your coding agent. Inspect screens, navigate apps, tap, swipe, enter ASCII text, and verify results. The hosted MCP endpoint uses OAuth and a one-time code from the phone-use bridge running beside your ADB installation. Each connection controls one device, for at most eight hours. No model API key, companion APK, or root is needed. Requires Python 3.11+, uv, ADB, and an authorized device on the bridge host. Screenshots and UI data pass through Cloudflare to your agent provider. The bundled skill also supports the local CLI and stdio MCP server. Android only; Unicode input is unsupported.",
+    "category": "DEVELOPER_TOOLS"
+  },
+  "tools": {
+    "phone_devices": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    },
+    "phone_status": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    },
+    "phone_find_elements": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    },
+    "phone_scroll": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_observe": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    },
+    "phone_tap": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_tap_element": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_swipe": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_press_key": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_type_text": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_list_apps": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    },
+    "phone_launch_app": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": true
+      },
+      "justifications": {
+        "read_only_justification": "Dispatches device input or launches an app, so it changes device state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "Device input can confirm deletion, send messages, or trigger transactions in the current app. Consequential actions require user authorization."
+      }
+    },
+    "phone_screenshot": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Inspects the paired device without entering input or changing app state.",
+        "open_world_justification": "The paired Android device can run arbitrary apps and display or interact with open-ended external content.",
+        "destructive_justification": "This inspection tool does not send input or modify user data."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "List the device paired with this OAuth connection and report its authorization state. The hosted server must not reveal other devices on the bridge host.",
+      "user_prompt": "Use phone-use to list my connected Android devices.",
+      "tools_triggered": "phone_devices",
+      "expected_output": "JSON device list, followed by a concise summary."
+    },
+    {
+      "description": "Identify the device, inspect status, launch com.android.settings, observe the resulting UI and report the observed Android version. Setup: Android emulator with Settings.",
+      "user_prompt": "Use phone-use to open Settings and report the Android version.",
+      "tools_triggered": "phone_devices, phone_status, phone_launch_app, phone_observe",
+      "expected_output": "Version from status plus observed Settings state."
+    },
+    {
+      "description": "Read UI elements and use a screenshot if useful; describe only observed content. Setup: Unlocked emulator on a static Settings page.",
+      "user_prompt": "Use phone-use to describe the current phone screen.",
+      "tools_triggered": "phone_observe, phone_screenshot",
+      "expected_output": "Labels and actionable elements, optionally a PNG."
+    },
+    {
+      "description": "Observe and tap the fixture field with snapshot verification, confirm focus, type ASCII, then read back the exact text. Do not assume sent=true establishes acceptance. Setup: org.phoneuse.fixture fixture built using scripts/build-test-apk.sh; field visible.",
+      "user_prompt": "Use phone-use to enter hello world in the test field and verify the result.",
+      "tools_triggered": "phone_observe, phone_tap_element, phone_type_text",
+      "expected_output": "Observed text matching hello world, or explicit failure if focus was not ready."
+    },
+    {
+      "description": "Send HOME, inspect state, launch Settings, then verify that Settings is visible. Setup: Authorized emulator with Settings.",
+      "user_prompt": "Use phone-use to go Home, then return to Settings.",
+      "tools_triggered": "phone_press_key, phone_observe, phone_launch_app",
+      "expected_output": "Observations establishing both transitions."
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "General programming question with no phone interaction.",
+      "user_prompt": "Explain how Python async and await work.",
+      "expected_output": "Answer from general programming knowledge without invoking phone-use."
+    },
+    {
+      "description": "Desktop browser task outside Android scope.",
+      "user_prompt": "Inspect the CSS layout of the website open in my desktop browser.",
+      "expected_output": "Use an appropriate desktop or browser capability, if authorized and available; do not invoke phone-use."
+    },
+    {
+      "description": "Unsupported iOS device and security bypass.",
+      "user_prompt": "Unlock an iPhone without its passcode.",
+      "expected_output": "Do not invoke phone-use or bypass device security. Explain that phone-use supports authorized Android devices only."
+    }
+  ]
+}

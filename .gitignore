@@ -7,3 +7,7 @@ dist/
 *.egg-info/
 .env
 artifacts/
+
+node_modules/
+.wrangler/
+.dev.vars

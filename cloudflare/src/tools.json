@@ -1,0 +1,567 @@
+[
+  {
+    "name": "phone_devices",
+    "description": "List ADB devices, including unauthorized and offline devices.",
+    "inputSchema": {
+      "properties": {},
+      "title": "devicesArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "devicesDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_status",
+    "description": "Check connection, Android version, screen dimensions and available capabilities.",
+    "inputSchema": {
+      "properties": {
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "title": "statusArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "statusDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_find_elements",
+    "description": "Find label, description or resource-ID matches in a fresh UI snapshot.",
+    "inputSchema": {
+      "properties": {
+        "query": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "find_elementsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "find_elementsDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_scroll",
+    "description": "Reveal content in a direction with one central swipe, then observe to verify movement.",
+    "inputSchema": {
+      "properties": {
+        "direction": {
+          "enum": [
+            "up",
+            "down",
+            "left",
+            "right"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "duration_ms": {
+          "default": 500,
+          "maximum": 10000,
+          "minimum": 50,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "direction"
+      ],
+      "title": "scrollArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "scrollDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_observe",
+    "description": "Read indexed UI elements. IDs are valid only with the returned snapshot.",
+    "inputSchema": {
+      "properties": {
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "title": "observeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "observeDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_tap",
+    "description": "Tap observed native screenshot coordinates, then observe to verify.",
+    "inputSchema": {
+      "properties": {
+        "x": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "Y",
+          "type": "integer"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "tapArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "tapDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_tap_element",
+    "description": "Re-read UI and tap an enabled element only if the snapshot still matches.",
+    "inputSchema": {
+      "properties": {
+        "element_id": {
+          "title": "Element Id",
+          "type": "string"
+        },
+        "snapshot": {
+          "title": "Snapshot",
+          "type": "string"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "element_id",
+        "snapshot"
+      ],
+      "title": "tap_elementArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "tap_elementDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_swipe",
+    "description": "Swipe in screenshot pixels. Equal endpoints produce a long press.",
+    "inputSchema": {
+      "properties": {
+        "x1": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "X1",
+          "type": "integer"
+        },
+        "y1": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "Y1",
+          "type": "integer"
+        },
+        "x2": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "X2",
+          "type": "integer"
+        },
+        "y2": {
+          "maximum": 32767,
+          "minimum": 0,
+          "title": "Y2",
+          "type": "integer"
+        },
+        "duration_ms": {
+          "default": 400,
+          "maximum": 10000,
+          "minimum": 50,
+          "title": "Duration Ms",
+          "type": "integer"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "x1",
+        "y1",
+        "x2",
+        "y2"
+      ],
+      "title": "swipeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "swipeDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_press_key",
+    "description": "Send one named Android navigation/editing key.",
+    "inputSchema": {
+      "properties": {
+        "key": {
+          "enum": [
+            "HOME",
+            "BACK",
+            "ENTER",
+            "DEL",
+            "TAB",
+            "APP_SWITCH",
+            "WAKEUP",
+            "VOLUME_UP",
+            "VOLUME_DOWN"
+          ],
+          "title": "Key",
+          "type": "string"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "press_keyArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "press_keyDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_type_text",
+    "description": "Type printable ASCII into the focused field. No automatic submit or clearing.",
+    "inputSchema": {
+      "properties": {
+        "text": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "type_textArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "type_textDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_list_apps",
+    "description": "List installed package identifiers.",
+    "inputSchema": {
+      "properties": {
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "title": "list_appsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "list_appsDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_launch_app",
+    "description": "Launch an installed app by package identifier using its launcher activity.",
+    "inputSchema": {
+      "properties": {
+        "package": {
+          "maxLength": 255,
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z0-9_]+)+$",
+          "title": "Package",
+          "type": "string"
+        },
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "required": [
+        "package"
+      ],
+      "title": "launch_appArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "launch_appDictOutput",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true
+    }
+  },
+  {
+    "name": "phone_screenshot",
+    "description": "Return a native-resolution PNG image. Use these pixels for coordinate actions.",
+    "inputSchema": {
+      "properties": {
+        "serial": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serial"
+        }
+      },
+      "title": "phone_screenshotArguments",
+      "type": "object"
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    }
+  }
+]

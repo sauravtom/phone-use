@@ -1,0 +1,58 @@
+{
+  "name": "phone-use",
+  "version": "0.1.0",
+  "submission_type": "With MCP",
+  "website_url": "https://phone-use.xagi.in",
+  "support_url": "https://github.com/sauravtom/phone-use/issues",
+  "release_notes": "Initial Codex plugin: 13 Android tools, OAuth-protected Cloudflare MCP relay, per-device outbound bridge, and portable skill with local CLI fallback. No model API keys or companion APK required.",
+  "reviewer_setup": "Pending: the directory requires a durable, preconfigured demo environment. Normal users run phone-use connect --serial SERIAL and pair using a ten-minute, single-use code. This is not a durable reviewer credential. Do not submit the draft until reviewer access and a demo recording are complete.",
+  "positive_tests": [
+    {
+      "description": "List the device paired with this OAuth connection and report its authorization state. The hosted server must not reveal other devices on the bridge host.",
+      "user_prompt": "Use phone-use to list my connected Android devices.",
+      "tools_triggered": "phone_devices",
+      "expected_output": "JSON device list, followed by a concise summary."
+    },
+    {
+      "description": "Identify the device, inspect status, launch com.android.settings, observe the resulting UI and report the observed Android version. Setup: Android emulator with Settings.",
+      "user_prompt": "Use phone-use to open Settings and report the Android version.",
+      "tools_triggered": "phone_devices, phone_status, phone_launch_app, phone_observe",
+      "expected_output": "Version from status plus observed Settings state."
+    },
+    {
+      "description": "Read UI elements and use a screenshot if useful; describe only observed content. Setup: Unlocked emulator on a static Settings page.",
+      "user_prompt": "Use phone-use to describe the current phone screen.",
+      "tools_triggered": "phone_observe, phone_screenshot",
+      "expected_output": "Labels and actionable elements, optionally a PNG."
+    },
+    {
+      "description": "Observe and tap the fixture field with snapshot verification, confirm focus, type ASCII, then read back the exact text. Do not assume sent=true establishes acceptance. Setup: org.phoneuse.fixture fixture built using scripts/build-test-apk.sh; field visible.",
+      "user_prompt": "Use phone-use to enter hello world in the test field and verify the result.",
+      "tools_triggered": "phone_observe, phone_tap_element, phone_type_text",
+      "expected_output": "Observed text matching hello world, or explicit failure if focus was not ready."
+    },
+    {
+      "description": "Send HOME, inspect state, launch Settings, then verify that Settings is visible. Setup: Authorized emulator with Settings.",
+      "user_prompt": "Use phone-use to go Home, then return to Settings.",
+      "tools_triggered": "phone_press_key, phone_observe, phone_launch_app",
+      "expected_output": "Observations establishing both transitions."
+    }
+  ],
+  "negative_tests": [
+    {
+      "description": "General programming question with no phone interaction.",
+      "user_prompt": "Explain how Python async and await work.",
+      "expected_output": "Answer from general programming knowledge without invoking phone-use."
+    },
+    {
+      "description": "Desktop browser task outside Android scope.",
+      "user_prompt": "Inspect the CSS layout of the website open in my desktop browser.",
+      "expected_output": "Use an appropriate desktop or browser capability, if authorized and available; do not invoke phone-use."
+    },
+    {
+      "description": "Unsupported iOS device and security bypass.",
+      "user_prompt": "Unlock an iPhone without its passcode.",
+      "expected_output": "Do not invoke phone-use or bypass device security. Explain that phone-use supports authorized Android devices only."
+    }
+  ]
+}

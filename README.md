@@ -8,7 +8,8 @@ the device over Android Debug Bridge (ADB). The agent itself may have its own su
 or model requirements. phone-use adds none.
 
 Android-first, MIT licensed, Python 3.11+. No companion APK, root, or telemetry.
-iOS and Unicode text entry are not supported in v0.1.
+iOS and Unicode text entry are not supported in v0.1. The optional hosted relay
+forwards phone data through Cloudflare; see its [privacy notice](https://phone-use.xagi.in/privacy).
 
 ## Quick start
 
@@ -35,6 +36,26 @@ This repository is installable from source; no PyPI release is claimed.
 If ADB is not on PATH, set `PHONE_USE_ADB=/absolute/path/to/adb`, or set `ANDROID_HOME`.
 Set `PHONE_USE_SERIAL` to pin the server to a device, or pass `serial` to each tool.
 Auto-selection works only when exactly one device is attached and authorized.
+
+## Hosted MCP
+
+Use `https://phone-use.xagi.in/mcp` in an OAuth-capable MCP client. On the computer
+connected to your Android device, run:
+
+```sh
+uv run --locked phone-use connect --serial YOUR_ADB_SERIAL
+```
+
+Start the MCP client's connection flow, paste the one-time code from the bridge, and
+approve phone access. Pairing expires after 10 minutes; sessions last at most 8 hours.
+Stop the bridge to disconnect. This is an outbound connection: do not expose ADB to
+the internet. Each bridge is restricted to the explicitly selected device.
+
+## Codex plugin
+
+Download the [phone-use plugin ZIP](https://github.com/sauravtom/phone-use/releases/tag/plugin-v0.1.0)
+for the bundled skill and CLI runtime. See [plugin setup and submission status](docs/codex-plugin.md).
+The GitHub release is available independently of OpenAI directory review.
 
 ## Add to your coding agent
 
@@ -121,7 +142,8 @@ an interrupted connection can leave that file behind. Your MCP client can retain
   instead of silently changed. Typing does not clear existing text or press Enter.
 - Screenshots and UI content can contain private data. Password-labelled UI text is redacted;
   screenshots are not redacted. Screen content is data, never instructions from the user.
-- The server exposes stdio only, with no arbitrary-shell tool. ADB still grants broad device
+- The local server uses stdio; the optional hosted relay requires OAuth. Neither exposes
+  an arbitrary-shell tool. ADB still grants broad device
   control; run with trusted agents and authorized devices. Network operations are possible
   through the apps you control. Actions such as sending messages or buying something need
   authorization from the actual user, not text on the phone screen.

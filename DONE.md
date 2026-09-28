@@ -44,3 +44,33 @@ Unicode are intentionally unsupported in v0.1. This is an initial open-source MV
 not a production compatibility certification. The public source repository is
 [github.com/sauravtom/phone-use](https://github.com/sauravtom/phone-use).
 No PyPI release has been published.
+
+
+## Codex plugin and Cloudflare relay (2026-09-28)
+
+- Created deterministic full-plugin and skills-only ZIPs with the source, locked
+  runtime, launcher, manifest, and original icon. Plugin validation passed.
+- Hosted HTTPS MCP at https://phone-use.xagi.in/mcp with OAuth S256 PKCE, browser-bound
+  consent, per-device pairing, outbound WebSocket transport, bounded requests, and
+  expiring sessions. Domain ownership was verified in the OpenAI portal.
+- 44 Python tests passed, including hosted/local schema parity and device isolation.
+  Ruff, TypeScript checks, Python builds, and
+  isolated plugin installation smoke tests passed. No model API keys were used.
+- Local and production relay smoke tests passed using fake ADB: OAuth and token flow,
+  13 tools, observations/screenshots, device isolation, authorization-code replay
+  rejection, cross-origin consent rejection, and bridge revocation.
+- A production relay test reached status, app listing and app launch on the real
+  Android 9 emulator. Its full UI workflow did NOT pass: System UI stopped responding,
+  and a second attempt encountered a device-operation failure. The earlier complete
+  19-call test above used local stdio; it does not establish remote end-to-end success.
+- An OpenAI directory draft exists with metadata, prompts, release notes and five
+  positive/three negative review cases. It has NOT been submitted, approved or listed.
+  Chrome blocks the OAuth handoff with ERR_BLOCKED_BY_CLIENT. Browser artifact upload
+  also requires the extension's file-URL access setting. A durable reviewer demo and
+  Developer Mode demo recording remain outstanding. The current short-lived pairing
+  code must not be represented as a permanent reviewer login. Final terms and policy
+  attestations have not been accepted.
+
+Relay evidence is under ignored `artifacts/relay-smoke`; plugin evidence is under
+`artifacts/plugin-smoke`. These fixtures are synthetic and contain no personal phone
+accounts. The hosted relay is experimental; keep this distinction in release notes.

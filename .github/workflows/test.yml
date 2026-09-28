@@ -15,3 +15,18 @@ jobs:
       - run: uv run --locked ruff check .
       - run: uv run --locked pytest -q
       - run: uv build
+      - run: uv run --locked python scripts/plugin-smoke.py
+  relay:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - run: npm ci
+      - run: npm run check

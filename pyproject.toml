@@ -9,7 +9,7 @@ description = "Give your coding agent hands on an Android phone. No API keys."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["mcp>=1.28.1,<2", "defusedxml>=0.7.1,<1", "pydantic>=2.11,<3"]
+dependencies = ["mcp>=1.28.1,<2", "defusedxml>=0.7.1,<1", "pydantic>=2.11,<3", "httpx>=0.28,<1", "websockets>=15,<17"]
 
 [project.urls]
 Repository = "https://github.com/sauravtom/phone-use"
