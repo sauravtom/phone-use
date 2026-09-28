@@ -112,7 +112,9 @@ function page(title: string, content: string, headers = new Headers(), redirectO
   headers.set('Content-Type', 'text/html; charset=utf-8');
   headers.set('Cache-Control', 'no-store');
   headers.set('X-Frame-Options', 'DENY');
-  headers.set('Referrer-Policy', 'no-referrer');
+  // no-referrer turns Origin into null on browser form POSTs, breaking consent.
+  // strict-origin preserves Origin without leaking OAuth query parameters.
+  headers.set('Referrer-Policy', 'strict-origin');
   headers.set('Content-Security-Policy', `default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self' ${redirectOrigin}; frame-ancestors 'none'; base-uri 'none'`);
   return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escape(title)} · phone-use</title><style>body{font:18px/1.6 system-ui;max-width:760px;padding:36px 24px;margin:auto;color:#172d30;background:#f9fbfa}a{color:#156f78}h1{font-size:40px;line-height:1.15}code,pre{background:#e8efed;border-radius:6px;padding:4px;overflow:auto}input{display:block;width:95%;padding:12px;font:inherit;margin:12px 0}button{padding:12px 20px;font:inherit;background:#156f78;color:white;border:0;border-radius:8px;margin:8px 8px 8px 0}.muted{color:#526467}footer{border-top:1px solid #cedad6;margin-top:36px;padding-top:16px;font-size:15px}</style><body><a href="/">phone-use</a><h1>${escape(title)}</h1>${content}<footer><a href="https://github.com/sauravtom/phone-use">Source</a> · <a href="https://github.com/sauravtom/phone-use/issues">Support</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></footer></body></html>`, { headers });
 }

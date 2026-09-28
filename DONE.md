@@ -65,8 +65,8 @@ No PyPI release has been published.
   19-call test above used local stdio; it does not establish remote end-to-end success.
 - An OpenAI directory draft exists with metadata, prompts, release notes and five
   positive/three negative review cases. It has NOT been submitted, approved or listed.
-  Chrome blocks the OAuth handoff with ERR_BLOCKED_BY_CLIENT. Browser artifact upload
-  also requires the extension's file-URL access setting. A durable reviewer demo and
+  The skill ZIP passed the portal scan; both icons and review JSON were uploaded.
+  Browser OAuth verification remains in progress. A durable reviewer demo and
   Developer Mode demo recording remain outstanding. The current short-lived pairing
   code must not be represented as a permanent reviewer login. Final terms and policy
   attestations have not been accepted.
@@ -83,3 +83,12 @@ The corrected skills-only builder emits one skill root: `SKILL.md`, `scripts/`,
 `agents/`, and `runtime/` at the ZIP top level. The full plugin archive is unchanged.
 Ruff and all 45 Python tests pass, including a regression check of the portal layout.
 This packaging check does not imply that the directory has accepted or approved it.
+
+### Browser consent origin correction
+
+Browser form submission exposed an Origin mismatch: the consent page's no-referrer
+policy caused a null Origin. The page now uses strict-origin, preserving the origin
+without sharing OAuth query parameters. The server still rejects null and foreign
+origins. Ruff, all 45 Python tests, npm ci/check, and local and production relay
+smoke tests passed. Cloudflare version: 17fa9583-83f8-450d-95a6-a1a572ade93c.
+These relay checks use fake ADB and do not replace real-device workflow validation.

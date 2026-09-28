@@ -100,6 +100,17 @@ async def run(origin):
                 )
                 consent = await client.get("/authorize?" + query)
                 assert consent.status_code == 200, consent.text
+                assert consent.headers["referrer-policy"] == "strict-origin"
+                for bad_origin in ("null", "https://untrusted.example"):
+                    blocked = await client.post(
+                        "/authorize",
+                        data={"decision": "approve"},
+                        headers={"Origin": bad_origin},
+                    )
+                    assert blocked.status_code == 403
+                results.append(
+                    "browser-compatible referrer policy; null and foreign origins blocked"
+                )
                 import re
 
                 handle = re.search('name="handle" value="([^"]+)"', consent.text).group(1)
