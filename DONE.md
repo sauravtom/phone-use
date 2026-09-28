@@ -74,3 +74,12 @@ No PyPI release has been published.
 Relay evidence is under ignored `artifacts/relay-smoke`; plugin evidence is under
 `artifacts/plugin-smoke`. These fixtures are synthetic and contain no personal phone
 accounts. The hosted relay is experimental; keep this distinction in release notes.
+
+
+### Directory skill archive correction
+
+The portal rejected the original skills ZIP because it included plugin-level files.
+The corrected skills-only builder emits one skill root: `SKILL.md`, `scripts/`,
+`agents/`, and `runtime/` at the ZIP top level. The full plugin archive is unchanged.
+Ruff and all 45 Python tests pass, including a regression check of the portal layout.
+This packaging check does not imply that the directory has accepted or approved it.

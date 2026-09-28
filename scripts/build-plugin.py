@@ -12,9 +12,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def build_archive(output: Path, *, skills_only: bool = False) -> Path:
     manifest = json.loads((ROOT / ".codex-plugin/plugin.json").read_text())
-    if skills_only:
-        manifest.pop("mcpServers", None)
-        manifest.pop("apps", None)
     files = {}
     for name in ("LICENSE",):
         files[name] = ROOT / name
@@ -31,15 +28,23 @@ def build_archive(output: Path, *, skills_only: bool = False) -> Path:
         files[runtime + name] = ROOT / name
     for path in (ROOT / "src/phone_use").glob("*.py"):
         files[runtime + path.relative_to(ROOT).as_posix()] = path
+    if skills_only:
+        prefix = "skills/phone-use/"
+        files = {
+            name.removeprefix(prefix): path
+            for name, path in files.items()
+            if name.startswith(prefix) or name == "LICENSE"
+        }
     output.mkdir(parents=True, exist_ok=True)
     kind = "skills" if skills_only else "plugin"
     archive = output / f"phone-use-{kind}-{manifest['version']}.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        manifest_entry = zipfile.ZipInfo(".codex-plugin/plugin.json", (1980, 1, 1, 0, 0, 0))
-        manifest_entry.compress_type = zipfile.ZIP_DEFLATED
-        manifest_entry.create_system = 3
-        manifest_entry.external_attr = 0o100644 << 16
-        bundle.writestr(manifest_entry, json.dumps(manifest, indent=2) + "\n")
+        if not skills_only:
+            manifest_entry = zipfile.ZipInfo(".codex-plugin/plugin.json", (1980, 1, 1, 0, 0, 0))
+            manifest_entry.compress_type = zipfile.ZIP_DEFLATED
+            manifest_entry.create_system = 3
+            manifest_entry.external_attr = 0o100644 << 16
+            bundle.writestr(manifest_entry, json.dumps(manifest, indent=2) + "\n")
         for name, path in sorted(files.items()):
             if path.is_symlink():
                 raise ValueError(f"Refusing symlink in plugin: {name}")

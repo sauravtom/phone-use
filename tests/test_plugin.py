@@ -17,9 +17,9 @@ def load_script(path):
 
 def test_plugin_archive_is_portable_and_reproducible(tmp_path):
     builder = load_script(ROOT / "scripts/build-plugin.py")
-    archive = builder.build_archive(tmp_path, skills_only=True)
+    archive = builder.build_archive(tmp_path)
     first = archive.read_bytes()
-    assert builder.build_archive(tmp_path, skills_only=True).read_bytes() == first
+    assert builder.build_archive(tmp_path).read_bytes() == first
     with zipfile.ZipFile(archive) as bundle:
         names = bundle.namelist()
         assert len(names) == len(set(names))
@@ -29,9 +29,9 @@ def test_plugin_archive_is_portable_and_reproducible(tmp_path):
             for part in Path(name).parts
         )
         assert not any(name.endswith((".keystore", ".env", ".apk")) for name in names)
-        assert ".mcp.json" not in names
+        assert ".mcp.json" in names
         manifest = json.loads(bundle.read(".codex-plugin/plugin.json"))
-        assert "mcpServers" not in manifest
+        assert manifest["mcpServers"] == "./.mcp.json"
         assert "apps" not in manifest
         interface = manifest["interface"]
         assert len(interface["shortDescription"]) <= 30
@@ -62,3 +62,27 @@ def test_full_plugin_declares_hosted_mcp(tmp_path):
         assert manifest["mcpServers"] == "./.mcp.json"
         servers = json.loads(bundle.read(".mcp.json"))["mcpServers"]
         assert servers["phone-use"]["url"] == "https://phone-use.xagi.in/mcp"
+
+
+def test_portal_upload_contains_one_skill_root(tmp_path):
+    builder = load_script(ROOT / "scripts/build-plugin.py")
+    archive = builder.build_archive(tmp_path, skills_only=True)
+    original = archive.read_bytes()
+    assert builder.build_archive(tmp_path, skills_only=True).read_bytes() == original
+    with zipfile.ZipFile(archive) as bundle:
+        names = bundle.namelist()
+        assert "SKILL.md" in names
+        assert [n for n in names if n.endswith("SKILL.md")] == ["SKILL.md"]
+        assert ".codex-plugin/plugin.json" not in names
+        assert ".mcp.json" not in names
+        assert not any(n.startswith(("skills/", "assets/")) for n in names)
+        assert "scripts/phone_use.py" in names
+        assert bundle.read("runtime/uv.lock") == (ROOT / "uv.lock").read_bytes()
+        for source in (ROOT / "src/phone_use").glob("*.py"):
+            assert (
+                bundle.read("runtime/" + source.relative_to(ROOT).as_posix()) == source.read_bytes()
+            )
+        target = tmp_path / "skill with spaces"
+        bundle.extractall(target)
+    launcher = load_script(target / "scripts/phone_use.py")
+    assert launcher.runtime_root() == target / "runtime"

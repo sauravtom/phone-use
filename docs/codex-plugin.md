@@ -79,8 +79,10 @@ one explicit device. Pairing codes expire in 10 minutes and work once; sessions
 last at most eight hours. Stop the bridge to revoke the device connection.
 
 Build `phone-use-skills-0.1.0.zip` with `python3 scripts/build-plugin.py --skills-only`
-for the portal's Skills tab. This upload omits `.mcp.json` because the portal registers
-the HTTPS MCP endpoint separately. The full downloadable plugin retains `.mcp.json`.
+for the portal's Skills tab. The upload has `SKILL.md` at the ZIP root, with `scripts/`, `agents/`, and
+`runtime/` beside it. It omits the plugin manifest, icons, and `.mcp.json`; the portal
+registers the HTTPS endpoint and listing assets separately. The full downloadable
+plugin retains its manifest, icons, and `.mcp.json`.
 
 Review materials are in [plugin-review.json](plugin-review.json), with the generated
 portal import at [chatgpt-app-submission.json](chatgpt-app-submission.json). The publisher
