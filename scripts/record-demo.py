@@ -98,7 +98,14 @@ async def run(origin, serial):
             assert response.status_code == 200
             token = response.json()["access_token"]
             spec = importlib.util.spec_from_file_location(
-                "device_smoke", ROOT / "scripts/record-workflow.py"
+                "device_smoke",
+                ROOT
+                / "scripts"
+                / (
+                    "record-visual-workflow.py"
+                    if os.environ.get("PHONE_USE_RECORDING_MODE") == "visual-browser"
+                    else "record-workflow.py"
+                ),
             )
             test = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(test)

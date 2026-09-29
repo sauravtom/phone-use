@@ -8,7 +8,10 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--directory", type=Path, default=Path("artifacts/recorded-demo"))
+parser.add_argument("--crop-top", type=int, default=0, help="Remove status bar pixels")
 args = parser.parse_args()
+if not 0 <= args.crop_top <= 200:
+    raise SystemExit("crop-top must be between 0 and 200")
 root = args.directory.resolve()
 report = json.loads((root / "report.json").read_text())
 if not report.get("passed") or not report.get("video_pulled"):
@@ -27,10 +30,10 @@ font = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 labels = [
     ("phone-use", 110, 140, 88, "white"),
     ("Control Android through MCP", 114, 255, 39, "0xb3d7d6"),
-    ("01  Observe the screen", 114, 430, 36, "white"),
+    ("01  Inspect the phone screenshot", 114, 430, 36, "white"),
     ("02  Enter text and press Apply", 114, 520, 36, "white"),
-    ("03  Read back the verified result", 114, 610, 36, "white"),
-    ("Real Android capture / scripted MCP client", 114, 785, 27, "0xb3d7d6"),
+    ("03  Verify the result on screen", 114, 610, 36, "white"),
+    ("Real Android / screenshot-guided MCP", 114, 785, 27, "0xb3d7d6"),
     ("Production HTTPS relay / no model API key", 114, 835, 27, "0xb3d7d6"),
     ("Continuous capture shown at 2x speed", 114, 925, 25, "0x56d3bb"),
     ("github.com/sauravtom/phone-use", 114, 970, 25, "0x56d3bb"),
@@ -43,7 +46,8 @@ for i, (text, x, y, size, color) in enumerate(labels):
         f"drawtext=fontfile={font}:textfile={label}:x={x}:y={y}:fontsize={size}:fontcolor={color}"
     )
 graph = (
-    "[0:v]setpts=(PTS-STARTPTS)/2,scale=-2:880,fps=30[phone];[1:v]"
+    f"[0:v]crop=iw:ih-{args.crop_top}:0:{args.crop_top},"
+    "setpts=(PTS-STARTPTS)/2,scale=-2:880,fps=30[phone];[1:v]"
     + ",".join(filters)
     + "[bg];[bg][phone]overlay=x=W-w-100:y=100:shortest=1[v]"
 )
@@ -89,6 +93,7 @@ print(
             "raw_seconds": duration,
             "playback_speed": 2,
             "phone_content": "actual screen capture, scaled for layout",
+            "top_pixels_cropped": args.crop_top,
         }
     )
 )

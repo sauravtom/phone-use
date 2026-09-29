@@ -11,6 +11,11 @@ Android-first, MIT licensed, Python 3.11+. No companion APK, root, or telemetry.
 iOS and Unicode text entry are not supported in v0.1. The optional hosted relay
 forwards phone data through Cloudflare; see its [privacy notice](https://phone-use.xagi.in/privacy).
 
+[Watch the real Android demo (28 seconds)](https://github.com/sauravtom/phone-use/releases/download/plugin-v0.1.0/phone-use-demo.mp4):
+a screenshot-guided MCP client types sample text, presses Apply, and checks the result
+through the production HTTPS relay. Continuous phone capture shown at 2x speed;
+this is a technical demo, not a recording of ChatGPT Developer Mode.
+
 ## Quick start
 
 Install [Android platform-tools](https://developer.android.com/tools/releases/platform-tools),

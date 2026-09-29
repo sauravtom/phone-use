@@ -70,9 +70,44 @@ checks for the sample controls before capture, verifies focus before typing, che
 the exact displayed result, and saves an actual MCP screenshot and Android MP4.
 It never navigates to personal apps or Home during capture. Review the whole capture
 for notifications or other private content before publishing. The shareable version
-clearly labels its continuous capture as 2x speed and its client as scripted MCP.
+clearly labels its continuous capture as 2x speed and its client as screenshot-guided MCP.
 The renderer refuses a failed test report.
 
 `uv run python scripts/review-device-smoke.py` checks real reviewer OAuth and status
 after loading the private environment. Add `--serial emulator-5554` for the complete
 native fixture workflow. Do not treat the status-only check as a full demo pass.
+
+### Screenshot-guided browser capture
+
+Some Chrome versions omit webpage nodes from Android's accessibility tree.
+Use the screenshot-and-coordinate fallback only after inspecting the sample page:
+
+```sh
+PHONE_USE_RECORDING_AUTHORIZED=1 PHONE_USE_RECORDING_MODE=visual-browser \
+  uv run python scripts/record-demo.py --serial YOUR_TEST_SERIAL
+```
+
+The recorder writes `artifacts/recorded-demo/before-screen.png` and prints
+`PREVIEW_READY`. Inspect that image, then write `visual-next.json` in the same
+directory with `{"action":"start","x":X,"y":Y}`, where X/Y are the input coordinates
+in the original screenshot resolution. Capture begins and MCP enters sample text.
+At `TYPED_READY`, inspect `typed-screen.png`, confirm the exact text, and write
+`{"action":"apply","x":X,"y":Y}` using the newly observed Apply coordinates.
+Do not reuse coordinates from a different phone or an earlier UI state.
+
+The script leaves `report.json` with `passed: false` even when tool calls complete.
+Inspect `verified-screen.png` and the video before changing the report to passed;
+record the visual verification method, the exact result, and
+`automatic_text_assertion: false`. This is supervised visual verification, not an
+automated text assertion. The renderer still requires a passed report and a retrieved
+video. `--crop-top N` can remove the Android status bar; document the crop.
+
+The September 29 physical Android 13 capture passed this visual workflow using
+`phone_screenshot`, `phone_tap`, `phone_type_text`, and `phone_press_key`.
+Its 56.82-second raw recording is published at 2x speed, with the top 40 pixels of
+the 540x1200 capture removed. No account data or notification content was visible in
+the reviewed frames. Rendering and tests ran on AWS.
+
+The OpenAI submission form explicitly requests a **Developer Mode** recording.
+This technical MCP demo does not replace that recording or the dedicated review
+device's full interaction tests. Directory publication remains pending.

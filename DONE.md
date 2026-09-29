@@ -130,3 +130,24 @@ connection path only, not the complete interaction workflow or reviewer demo.
 Reviewer credentials and service environment are private AWS files outside Git.
 The OpenAI draft remains unsubmitted. Do not fill a demo video URL or claim the five
 review cases passed until those results have actually been obtained.
+
+### Physical-phone demo recorded and published (September 29)
+
+- Completed a real Android 13 workflow through the production HTTPS MCP relay:
+  inspect sample-page screenshot, tap input, enter "hello world", hide keyboard,
+  inspect the new screenshot, tap Apply, and visually confirm "Verified: hello world".
+- Chrome did not expose webpage nodes in its Android hierarchy. Used supported MCP
+  screenshot/coordinate tools with agent visual review; no automated text assertion
+  or successful element-tree workflow is claimed.
+- Captured 56.82 seconds of actual Android video; rendered a continuous 28.43-second
+  1080p demo at 2x speed on AWS. Cropped only the 40-pixel status bar from the raw
+  540x1200 capture. Reviewed one-second contact sheets, key MCP screenshots and the
+  rendered final frame; decoded the complete MP4 without ffmpeg errors.
+- Published and verified HTTP 200 for:
+  https://github.com/sauravtom/phone-use/releases/download/plugin-v0.1.0/phone-use-demo.mp4
+- Restored the phone's original stay-awake setting, stopped/revoked the scoped bridge
+  and closed the loopback-only SSH ADB tunnel.
+- The directory form explicitly asks for a Developer Mode video. This technical
+  screenshot-guided MCP recording was not entered as a substitute. The directory
+  draft remains unsubmitted; dedicated emulator full-workflow reliability and a
+  Developer Mode recording are still outstanding.
