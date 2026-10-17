@@ -134,12 +134,25 @@ public class MainActivity extends Activity {
         check("direct_explicit_loader_child", 20, null, loader, "--library-path", libs, bash, "-c",
               "\"$SPIKE_LOADER\" --library-path \"$SPIKE_LIBS\" \"$SPIKE_ROOT/usr/bin/python3\" -c 'print(456)'");
         check("ubuntu_git_version", 10, null, loader, "--library-path", libs, file("usr/bin/git"), "--version");
+        long networkStart = System.currentTimeMillis();
+        javax.net.ssl.HttpsURLConnection connection = null;
+        try {
+            connection = (javax.net.ssl.HttpsURLConnection)new java.net.URL("https://example.com").openConnection();
+            connection.setConnectTimeout(10000); connection.setReadTimeout(10000);
+            int status = connection.getResponseCode();
+            add("android_https", status == 200 ? "passed" : "failed", "HTTP " + status,
+                System.currentTimeMillis()-networkStart, status);
+        } catch (Exception e) { add("android_https", "failed", e.toString(), System.currentTimeMillis()-networkStart, -1); }
+        finally { if (connection != null) connection.disconnect(); }
         check("ubuntu_https", 40, null, loader, "--library-path", libs, file("usr/bin/curl"), "--fail", "--max-time", "25", "--head", "https://example.com");
         File repo = new File(getFilesDir(), "fixture-repo"); repo.mkdirs();
         check("git_init", 10, null, loader, "--library-path", libs, file("usr/bin/git"), "init", repo.toString());
         try (FileWriter w = new FileWriter(new File(repo, "hello.txt"))) { w.write("synthetic fixture\n"); }
         check("git_add", 10, null, loader, "--library-path", libs, file("usr/bin/git"), "-C", repo.toString(), "add", "hello.txt");
         check("git_commit", 10, null, loader, "--library-path", libs, file("usr/bin/git"), "-C", repo.toString(), "-c", "user.name=Runtime Spike", "-c", "user.email=spike@example.invalid", "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-m", "fixture");
+        try (FileWriter w = new FileWriter(new File(repo, "hello.txt"))) { w.write("changed synthetic fixture\n"); }
+        check("git_diff", 10, null, loader, "--library-path", libs, file("usr/bin/git"), "-C", repo.toString(), "diff", "--", "hello.txt");
+        check("git_clone", 40, null, loader, "--library-path", libs, file("usr/bin/git"), "clone", "--depth", "1", "https://github.com/octocat/Hello-World.git", new File(getFilesDir(), "clone-" + System.currentTimeMillis()).toString());
         String proot = getApplicationInfo().nativeLibraryDir + "/libproot.so";
         if (new File(proot).exists()) {
             check("proot_version", 10, null, proot, "--version");
@@ -147,11 +160,14 @@ public class MainActivity extends Activity {
         } else add("proot_child_chain", "not_run", "PRoot binary not included in this build", 0, -1);
         String codex = file("opt/codex");
         String packagedCodex = getApplicationInfo().nativeLibraryDir + "/libcodex.so";
-        if (new File(packagedCodex).exists()) check("packaged_codex_version", 30, null, packagedCodex, "--version");
+        String initialize = "{\"id\":1,\"method\":\"initialize\",\"params\":{\"clientInfo\":{\"name\":\"runtime-spike\",\"title\":\"Runtime Spike\",\"version\":\"0.1\"}}}\n";
+        if (new File(packagedCodex).exists()) {
+            check("packaged_codex_version", 30, null, packagedCodex, "--version");
+            check("packaged_codex_protocol", 30, initialize, packagedCodex, "app-server", "--listen", "stdio://");
+        }
         if (new File(codex).exists()) {
             check("codex_version", 30, null, codex, "--version");
-            check("codex_protocol", 30,
-                  "{\"id\":1,\"method\":\"initialize\",\"params\":{\"clientInfo\":{\"name\":\"runtime-spike\",\"title\":\"Runtime Spike\",\"version\":\"0.1\"}}}\n{\"method\":\"initialized\"}\n",
+            check("codex_protocol", 30, initialize,
                   codex, "app-server", "--listen", "stdio://");
         } else add("codex_protocol", "not_run", "Codex binary not included in this build", 0, -1);
         add("authenticated_agent_task", "not_run", "No provider credentials requested or copied", 0, -1);
@@ -180,13 +196,35 @@ public class MainActivity extends Activity {
             env.put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot_loader.so");
             env.put("PROOT_NO_SECCOMP", "1");
             process = builder.start();
-            try (OutputStream stdin = process.getOutputStream()) {
-                if (input != null) stdin.write(input.getBytes(StandardCharsets.UTF_8));
+            boolean protocolOk = false;
+            String text;
+            if (input == null) {
+                process.getOutputStream().close();
+                text = read(process.getInputStream(), 32_000);
+            } else {
+                StringBuilder transcript = new StringBuilder();
+                try (OutputStream stdin = process.getOutputStream();
+                     BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                    stdin.write(input.getBytes(StandardCharsets.UTF_8)); stdin.flush();
+                    String line;
+                    while ((line = stdout.readLine()) != null) {
+                        if (transcript.length() < 32000) transcript.append(line.substring(0, Math.min(line.length(), 32000-transcript.length()))).append('\n');
+                        try {
+                            JSONObject message = new JSONObject(line);
+                            if (message.optInt("id", -1) == 1) {
+                                protocolOk = message.has("result") && !message.has("error");
+                                if (protocolOk) stdin.write("{\"method\":\"initialized\"}\n".getBytes(StandardCharsets.UTF_8));
+                                stdin.close();
+                            }
+                        } catch (org.json.JSONException ignored) { }
+                    }
+                }
+                text = transcript.toString();
             }
-            String text = read(process.getInputStream(), 32_000);
             int exit = process.waitFor(); process = null;
             boolean ok = name.equals("timeout_owned_group") ? exit == 124 : exit == 0;
-            if (name.equals("codex_protocol")) ok = ok && text.contains("\"result\"") && text.contains("\"id\":1");
+            if (input != null) ok = ok && protocolOk;
+            if (name.equals("git_diff")) ok = ok && text.contains("+changed synthetic fixture");
             add(name, cancelled ? "cancelled" : ok ? "passed" : "failed", text, System.currentTimeMillis()-start, exit);
         } catch (Exception e) { add(name, cancelled ? "cancelled" : "failed", e.toString(), System.currentTimeMillis()-start, -1); }
         finally { Process p = process; if (p != null) p.destroy(); process = null; }
