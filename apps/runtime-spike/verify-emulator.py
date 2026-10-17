@@ -6,16 +6,20 @@ import json
 import subprocess
 import time
 from pathlib import Path
+from zipfile import ZipFile
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--adb", required=True)
 parser.add_argument("--serial", required=True)
 parser.add_argument("--artifacts", type=Path, required=True)
+parser.add_argument("--reports", type=Path)
 parser.add_argument("--boot-timeout", type=int, default=600)
 parser.add_argument("--run-timeout", type=int, default=1200)
 args = parser.parse_args()
 if not args.serial.startswith("emulator-"):
     parser.error("This collector is limited to an explicitly selected emulator")
+reports = args.reports or args.artifacts
+reports.mkdir(parents=True, exist_ok=True)
 
 
 def adb(*arguments, timeout=20):
@@ -43,8 +47,19 @@ print("Emulator boot complete", flush=True)
 for target, suffix in ((28, "legacy"), (36, "modern")):
     apk = args.artifacts / f"runtime-spike-x86_64-target{target}.apk"
     package = f"dev.phoneuse.spike.{suffix}"
+    with apk.open("rb") as stream:
+        apk_hash = hashlib.file_digest(stream, "sha256").hexdigest()
+    with ZipFile(apk) as archive:
+        expected_build = json.loads(archive.read("assets/build.json"))
+    previous = adb("exec-out", "run-as", package, "cat", "files/report.json")
+    try:
+        previous_run = json.loads(previous.stdout).get("startedAt")
+    except ValueError:
+        previous_run = None
+    installed = adb("shell", "pm", "path", package).stdout.startswith("package:")
     result = adb("install", "--no-incremental", "-r", str(apk), timeout=240)
-    print(result.stdout + result.stderr, flush=True)
+    install_output = result.stdout + result.stderr
+    print(install_output, flush=True)
     if result.returncode:
         raise SystemExit("APK installation failed")
     adb("shell", "am", "force-stop", package)
@@ -66,12 +81,25 @@ for target, suffix in ((28, "legacy"), (36, "modern")):
     report = None
     while time.monotonic() < deadline:
         time.sleep(5)
-        result = adb("exec-out", "run-as", package, "cat", "files/report.json", timeout=30)
         try:
+            result = adb("exec-out", "run-as", package, "cat", "files/report.json", timeout=30)
             candidate = json.loads(result.stdout)
-        except (json.JSONDecodeError, ValueError):
+        except (ValueError, subprocess.TimeoutExpired):
             continue
+        if candidate.get("startedAt") == previous_run:
+            continue
+        if candidate.get("build") != expected_build:
+            raise SystemExit("Report build does not match the installed APK")
         report = candidate
+        report["apkSha256"] = apk_hash
+        report["collector"] = {
+            "serial": args.serial,
+            "scope": "x86_64 Android emulator only",
+            "installOutput": install_output,
+            "installationMode": "update" if installed else "fresh",
+        }
+        path = reports / f"emulator-target{target}.json"
+        path.write_text(json.dumps(report, indent=2) + "\n")
         for check in report["checks"][observed:]:
             print(f"target{target}: {check['name']}: {check['status']}", flush=True)
         observed = len(report["checks"])
@@ -79,15 +107,6 @@ for target, suffix in ((28, "legacy"), (36, "modern")):
             break
     if report is None:
         raise SystemExit("No app-written report was obtained")
-    with apk.open("rb") as stream:
-        report["apkSha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
-    report["collector"] = {
-        "serial": args.serial,
-        "scope": "x86_64 Android emulator only",
-        "installOutput": result.stdout if report is None else "see console log",
-    }
-    path = args.artifacts / f"emulator-target{target}.json"
-    path.write_text(json.dumps(report, indent=2) + "\n")
     if report["state"] == "running":
         raise SystemExit("Run timed out; partial report preserved")
     print(str(path), flush=True)
