@@ -142,6 +142,8 @@ public class MainActivity extends Activity {
             check("proot_child_chain", 40, null, proot, "-r", root.toString(), "-b", "/dev", "-b", "/proc", "-b", "/system", "-w", "/tmp", "/usr/bin/bash", "-c", "/usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
         } else add("proot_child_chain", "not_run", "PRoot binary not included in this build", 0, -1);
         String codex = file("opt/codex");
+        String packagedCodex = getApplicationInfo().nativeLibraryDir + "/libcodex.so";
+        if (new File(packagedCodex).exists()) check("packaged_codex_version", 30, null, packagedCodex, "--version");
         if (new File(codex).exists()) {
             check("codex_version", 30, null, codex, "--version");
             check("codex_protocol", 30,
