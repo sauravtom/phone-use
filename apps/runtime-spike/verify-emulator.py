@@ -13,6 +13,7 @@ parser.add_argument("--adb", required=True)
 parser.add_argument("--serial", required=True)
 parser.add_argument("--artifacts", type=Path, required=True)
 parser.add_argument("--reports", type=Path)
+parser.add_argument("--runtime-pack", type=Path)
 parser.add_argument("--boot-timeout", type=int, default=600)
 parser.add_argument("--run-timeout", type=int, default=1200)
 args = parser.parse_args()
@@ -63,6 +64,28 @@ for target, suffix in ((28, "legacy"), (36, "modern")):
     if result.returncode:
         raise SystemExit("APK installation failed")
     adb("shell", "am", "force-stop", package)
+    if expected_build.get("runtimeDelivery") == "staged":
+        if not args.runtime_pack:
+            raise SystemExit("This APK requires --runtime-pack")
+        print(f"Staging hash-verified fixture for target{target}", flush=True)
+        # Import bytes only. All executable tests still run in the Activity's app process.
+        with args.runtime_pack.open("rb") as source:
+            staged = subprocess.run(
+                [
+                    args.adb,
+                    "-s",
+                    args.serial,
+                    "shell",
+                    "-T",
+                    f"run-as {package} sh -c 'cat > files/runtime.zip'",
+                ],
+                stdin=source,
+                capture_output=True,
+                timeout=600,
+                check=False,
+            )
+        if staged.returncode:
+            raise SystemExit("Runtime staging failed: " + staged.stderr.decode())
     launch = adb(
         "shell",
         "am",

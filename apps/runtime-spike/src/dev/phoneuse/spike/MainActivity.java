@@ -167,7 +167,7 @@ public class MainActivity extends Activity {
         if (new File(packagedCodex).exists()) {
             check("packaged_codex_version", 30, null, packagedCodex, "--version");
             check("packaged_codex_protocol", 30, initialize, packagedCodex, "app-server", "--listen", "stdio://");
-        }
+        } else add("packaged_codex_protocol", "not_run", "Small staged APK omits the APK-installed Codex copy", 0, -1);
         if (new File(codex).exists()) {
             check("codex_version", 30, null, codex, "--version");
             check("codex_protocol", 30, initialize,
@@ -263,7 +263,10 @@ public class MainActivity extends Activity {
         }
         long total = 0;
         Set<String> seen = new HashSet<>();
-        try (ZipInputStream zip = new ZipInputStream(getAssets().open("runtime.zip"))) {
+        boolean staged = "staged".equals(report.getJSONObject("build").optString("runtimeDelivery"));
+        InputStream packInput = staged ? new FileInputStream(new File(getFilesDir(), "runtime.zip"))
+                                      : getAssets().open("runtime.zip");
+        try (ZipInputStream zip = new ZipInputStream(packInput)) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 if (cancelled) throw new IOException("Cancelled installation");

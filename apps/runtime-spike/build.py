@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--abi", choices=["arm64-v8a", "x86_64"], required=True)
     parser.add_argument("--target", choices=[28, 36], type=int, required=True)
     parser.add_argument("--native-extra", type=Path)
+    parser.add_argument("--staged-runtime", action="store_true")
     args = parser.parse_args()
     out = args.out.resolve() / f"{args.abi}-target{args.target}"
     out.mkdir(parents=True, exist_ok=True)
@@ -49,6 +50,8 @@ def main():
     )
     if args.native_extra:
         for item in args.native_extra.glob("*.so"):
+            if args.staged_runtime and item.name == "libcodex.so":
+                continue
             shutil.copyfile(item, native / item.name)
     package = f"dev.phoneuse.spike.{'legacy' if args.target == 28 else 'modern'}"
     manifest = out / "AndroidManifest.xml"
@@ -69,7 +72,11 @@ def main():
     </manifest>''')
     assets = out / "assets"
     assets.mkdir(exist_ok=True)
-    for name in ("runtime.zip", "runtime-manifest.json"):
+    for name in (
+        ("runtime-manifest.json",)
+        if args.staged_runtime
+        else ("runtime.zip", "runtime-manifest.json")
+    ):
         shutil.copyfile(args.runtime / name, assets / name)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=HERE, text=True).strip()
     (assets / "build.json").write_text(
@@ -78,6 +85,7 @@ def main():
                 "sourceCommit": commit,
                 "abi": args.abi,
                 "targetSdk": args.target,
+                "runtimeDelivery": "staged" if args.staged_runtime else "bundled",
                 "fixture": "Ubuntu noble packages; see packages.txt in runtime artifacts",
                 "warning": "Debug research APK, not a release app or security sandbox",
             }
