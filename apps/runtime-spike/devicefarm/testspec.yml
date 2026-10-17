@@ -1,0 +1,14 @@
+version: 0.1
+android_test_host: amazon_linux_2
+phases:
+  install:
+    commands:
+      - devicefarm-cli use python 3.12
+      - cd "$DEVICEFARM_TEST_PACKAGE_PATH"
+      - python -m pip install -r requirements.txt
+  test:
+    commands:
+      - cd "$DEVICEFARM_TEST_PACKAGE_PATH"
+      - python -m pytest -v -s tests/ --junitxml="$DEVICEFARM_LOG_DIR/junit.xml"
+artifacts:
+  - $DEVICEFARM_LOG_DIR
