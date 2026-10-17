@@ -96,6 +96,9 @@ public class MainActivity extends Activity {
         runner = getApplicationInfo().nativeLibraryDir + "/libspike_runner.so";
         File compatibility = new File(getFilesDir(), "native-links"); compatibility.mkdirs();
         File talloc = new File(compatibility, "libtalloc.so.2");
+        // APK updates can move nativeLibraryDir; refresh only our own symlink.
+        if (java.nio.file.Files.isSymbolicLink(talloc.toPath()) && !talloc.delete())
+            throw new IOException("Cannot refresh native library link");
         if (!talloc.exists() && new File(getApplicationInfo().nativeLibraryDir + "/libtalloc.so").exists())
             Os.symlink(getApplicationInfo().nativeLibraryDir + "/libtalloc.so", talloc.toString());
         boolean arm = Build.SUPPORTED_ABIS[0].startsWith("arm64");
