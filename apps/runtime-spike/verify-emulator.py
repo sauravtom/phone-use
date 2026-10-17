@@ -77,7 +77,7 @@ for target, suffix in ((28, "legacy"), (36, "modern")):
                     args.serial,
                     "shell",
                     "-T",
-                    f"run-as {package} sh -c 'cat > files/runtime.zip'",
+                    f"run-as {package} sh -c 'mkdir -p files && cat > files/runtime.zip'",
                 ],
                 stdin=source,
                 capture_output=True,
