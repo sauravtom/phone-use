@@ -1,6 +1,9 @@
 # ARM64 Android runtime feasibility spike
 
-Status: proposed tests, not execution results. Read the
+Status: the diagnostic harness and AWS APK builds are implemented. The
+[execution report](runtime-feasibility-results.md) records passing host checks and
+blocked Android execution; the runtime exit gate has not passed. The matrix below
+remains the required verification scope. Read the
 [architecture decision](on-device-linux-plan.md) first. The spike should answer one
 question: can an ordinary, unrooted Android app reliably host the required local
 agent/tool subprocess chain under an explicitly chosen distribution model?
