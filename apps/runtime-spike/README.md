@@ -19,8 +19,9 @@ package versions/hashes. It is a curated userspace fixture, not a bootable Ubunt
 
 ```sh
 bash apps/runtime-spike/prepare-runtime.sh /home/saurav/builds/phone-use-phase0/runtime
+python3 apps/runtime-spike/fetch-engines.py /home/saurav/builds/phone-use-phase0/runtime
 python3 apps/runtime-spike/pack.py /home/saurav/builds/phone-use-phase0/runtime/amd64/root /home/saurav/builds/phone-use-phase0/runtime/amd64/pack
-python3 apps/runtime-spike/build.py --sdk /home/saurav/Android/Sdk --runtime /home/saurav/builds/phone-use-phase0/runtime/amd64/pack --out /home/saurav/builds/phone-use-phase0/artifacts --abi x86_64 --target 28
+python3 apps/runtime-spike/build.py --sdk /home/saurav/Android/Sdk --runtime /home/saurav/builds/phone-use-phase0/runtime/amd64/pack --native-extra /home/saurav/builds/phone-use-phase0/runtime/amd64/native-extra --out /home/saurav/builds/phone-use-phase0/artifacts --abi x86_64 --target 28
 ```
 
 Repeat the pack/build for `arm64` / `arm64-v8a` and both targets 28 and 36.
@@ -28,6 +29,13 @@ Builds are debug-signed with a task-local throwaway key outside source. Do not s
 these as a production app. The build embeds its source commit and runtime manifest;
 APK hashes are recorded in the external test report. APT versions are recorded but
 not yet pinned to a snapshot; retain packages.txt and the downloaded packages.
+
+The optional engine fetcher pins Codex 0.163.0 and checks GitHub's release asset
+digest. PRoot and its two dependencies are checked against hashes in Termux's
+HTTPS package index, with exact versions recorded in `engines.json`. That index
+check is not independent signature verification. Vendor binaries are unmodified.
+Before distributing an app publicly, complete the third-party license/source-offer
+review and package all required notices; these APKs are internal feasibility builds.
 
 ## Test on the dedicated AWS emulator
 
@@ -44,6 +52,19 @@ Activity, never by ADB shell. The app also has Run, Cancel and Export buttons.
 It persists each result atomically and labels a previously running report interrupted
 on restart. Leaving/destroying the Activity cancels work; persistent background
 execution is deliberately outside this initial probe.
+
+For bounded collection of both variants after the emulator boots:
+
+```sh
+python3 apps/runtime-spike/verify-emulator.py --adb /home/saurav/Android/Sdk/platform-tools/adb --serial emulator-5580 --artifacts /home/saurav/builds/phone-use-phase0/artifacts
+```
+
+For the separate Linux host supervisor check (never count this as Android evidence):
+
+```sh
+cc -O2 -Wall -Wextra -Werror apps/runtime-spike/native/runner.c -o /home/saurav/builds/phone-use-phase0/host-runner
+python3 apps/runtime-spike/test-supervisor.py /home/saurav/builds/phone-use-phase0/host-runner
+```
 
 Checks explicitly distinguish `passed`, `failed`, `cancelled`, and `not_run`.
 An expected timeout is passing only when the supervisor returns 124. Codex protocol
