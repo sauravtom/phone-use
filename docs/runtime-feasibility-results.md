@@ -4,6 +4,11 @@ Date: 2026-10-17. Status: APK builds and host checks complete; Android execution
 verification blocked by unstable software emulation. Phase 0 has not passed its
 runtime exit gate. Do not start the full workspace app on the strength of these results.
 
+Follow-up: the [AWS validation plan](aws-android-validation-plan.md) identifies the
+current host as an unsupported T3a instance and recommends AWS Device Farm ARM64
+tests first, with a temporary nested-KVM host as an optional debugging fallback.
+No new infrastructure or device run has been started.
+
 This spike adds a separate diagnostic APK under `apps/runtime-spike/`. The existing
 Python MCP/CLI still has no model dependency or required API key. No full workspace
 app, subscription service or cloud desktop was built.
