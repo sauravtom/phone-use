@@ -5,6 +5,14 @@ no infrastructure provisioned, instance restarted, or Device Farm run submitted.
 Android runtime feasibility remains unverified. See the
 [existing evidence](runtime-feasibility-results.md).
 
+Execution preparation: the user subsequently approved up to $20 for Device Farm.
+The [Device Farm collector](../apps/runtime-spike/devicefarm/README.md) is implemented
+and its test ZIP built on AWS. Ruff and 58 host tests passed. AWS sign-in refresh
+is pending; the browser authorization flow stalled and the normal Console sign-in
+page was opened in Chrome. No Device Farm project, upload or run has been created
+at this checkpoint, so no Device Farm spend has started. The prior spending
+proposal below is now authorized within that $20 scope; do not ask for it again.
+
 ## Recommendation
 
 Run the bundled ARM64 diagnostic APK on **AWS Device Farm first**. This directly
