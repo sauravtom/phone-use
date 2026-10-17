@@ -84,16 +84,27 @@ def main():
         )
     )
     unsigned = out / "unsigned.apk"
-    run(bt / "aapt2", "link", "-o", unsigned, "--manifest", manifest, "-I", android, "-A", assets)
+    run(
+        bt / "aapt2",
+        "link",
+        "-o",
+        unsigned,
+        "--manifest",
+        manifest,
+        "-I",
+        android,
+        "-A",
+        assets,
+        "-0",
+        "zip",
+    )
     classes = out / "classes"
     classes.mkdir(exist_ok=True)
     run(
         "javac",
-        "-source",
+        "--release",
         "8",
-        "-target",
-        "8",
-        "-bootclasspath",
+        "-classpath",
         android,
         "-d",
         classes,
