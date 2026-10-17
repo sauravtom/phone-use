@@ -128,6 +128,8 @@ public class MainActivity extends Activity {
         long began = System.currentTimeMillis();
         try { install(); add("runtime_install", "passed", "Verified every file before activation", System.currentTimeMillis()-began, 0); }
         catch (Exception e) { add("runtime_install", "failed", e.toString(), System.currentTimeMillis()-began, -1); return; }
+        if (!new File(root, "home/spike").isDirectory() && !new File(root, "home/spike").mkdirs())
+            throw new IOException("Cannot create persistent synthetic runtime home");
         String bash = file("usr/bin/bash");
         check("ubuntu_loader", 10, null, loader, "--version");
         check("ubuntu_bash", 10, null, loader, "--library-path", libs, bash, "--noprofile", "--norc", "-c", "printf 'BASH_OK %s\\n' \"$BASH_VERSION\"");
@@ -193,8 +195,11 @@ public class MainActivity extends Activity {
             check("codex_protocol", 30, initialize,
                   codex, "app-server", "--listen", "stdio://");
         } else add("codex_protocol", "not_run", "Codex binary not included in this build", 0, -1);
-        if (new File(proot).exists())
+        if (new File(proot).exists()) {
             prootCheck("proot_codex_protocol", 30, initialize, "/opt/codex", "app-server", "--listen", "stdio://");
+            prootCheck("proot_codex_exec_android_sandbox", 30, initialize, "/opt/codex", "app-server", "--listen", "stdio://");
+            prootCheck("proot_codex_exec_readonly", 30, initialize, "/opt/codex", "app-server", "--listen", "stdio://");
+        }
         add("authenticated_agent_task", "not_run", "No provider credentials requested or copied", 0, -1);
         add("claude_runtime", "not_run", "Claude runtime not included in this first probe", 0, -1);
         add("lifecycle_storage_privacy_matrix", "not_run", "Requires separate fault-injection and lifecycle validation", 0, -1);
@@ -241,7 +246,7 @@ public class MainActivity extends Activity {
             env.put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot_loader.so");
             env.put("PROOT_NO_SECCOMP", "1");
             if (command[0].endsWith("/libproot.so")) {
-                env.put("HOME", "/tmp"); env.put("TMPDIR", "/tmp");
+                env.put("HOME", "/home/spike"); env.put("TMPDIR", "/tmp");
                 env.put("PATH", "/usr/bin:/bin:/system/bin");
                 env.put("PYTHONHOME", "/usr"); env.put("GIT_EXEC_PATH", "/usr/lib/git-core");
                 env.put("GIT_TEMPLATE_DIR", "/usr/share/git-core/templates");
@@ -267,6 +272,24 @@ public class MainActivity extends Activity {
                             if (message.optInt("id", -1) == 1) {
                                 protocolOk = message.has("result") && !message.has("error");
                                 if (protocolOk) stdin.write("{\"method\":\"initialized\"}\n".getBytes(StandardCharsets.UTF_8));
+                                if (protocolOk && name.startsWith("proot_codex_exec_")) {
+                                    // Independent capability probes, never a fallback after sandbox failure.
+                                    JSONObject policy = new JSONObject().put("type",
+                                        name.endsWith("readonly") ? "readOnly" : "externalSandbox");
+                                    JSONObject params = new JSONObject()
+                                        .put("command", new JSONArray(Arrays.asList("/usr/bin/bash", "-c",
+                                            "set -eu; /usr/bin/python3 -c \"print('CODEX_CHILD_OK')\"; /usr/bin/git --version")))
+                                        .put("cwd", "/home/spike").put("timeoutMs", 10000)
+                                        .put("outputBytesCap", 8192).put("sandboxPolicy", policy);
+                                    JSONObject request = new JSONObject().put("id", 2).put("method", "command/exec").put("params", params);
+                                    stdin.write((request.toString() + "\n").getBytes(StandardCharsets.UTF_8));
+                                    stdin.flush(); protocolOk = false;
+                                } else stdin.close();
+                            } else if (message.optInt("id", -1) == 2 && name.startsWith("proot_codex_exec_")) {
+                                JSONObject result = message.optJSONObject("result");
+                                protocolOk = result != null && !message.has("error") && result.optInt("exitCode", -1) == 0
+                                    && result.optString("stdout").contains("CODEX_CHILD_OK")
+                                    && result.optString("stdout").contains("git version");
                                 stdin.close();
                             }
                         } catch (org.json.JSONException ignored) { }
