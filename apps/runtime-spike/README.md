@@ -25,6 +25,13 @@ python3 apps/runtime-spike/build.py --sdk /home/saurav/Android/Sdk --runtime /ho
 ```
 
 Repeat the pack/build for `arm64` / `arm64-v8a` and both targets 28 and 36.
+For the preferred small test APK, use `--staged-runtime` and a fresh output directory
+such as `/home/saurav/builds/phone-use-phase0/artifacts/staged`. This keeps the
+manifest and small native helpers inside the APK, while the ZIP is imported into
+app-private storage separately. Every imported file must still match the manifest
+signed into the APK. The extra APK-installed Codex copy is omitted in this mode;
+Codex from the runtime payload can still be tested.
+
 Builds are debug-signed with a task-local throwaway key outside source. Do not ship
 these as a production app. The build embeds its source commit and runtime manifest;
 APK hashes are recorded in the external test report. APT versions are recorded but
@@ -59,6 +66,12 @@ For bounded collection of both variants after the emulator boots:
 python3 apps/runtime-spike/verify-emulator.py --adb /home/saurav/Android/Sdk/platform-tools/adb --serial emulator-5580 --artifacts /home/saurav/builds/phone-use-phase0/artifacts
 ```
 
+For staged APKs, also pass `--runtime-pack /home/saurav/builds/phone-use-phase0/runtime/amd64/pack/runtime.zip`
+and point `--artifacts` to the staged output directory. `--reports` can select a
+separate evidence directory for each emulator. The debug importer copies bytes
+with `run-as`; it never runs a runtime test through ADB. The Activity performs all
+executable checks under its normal app UID. No credentials are imported.
+
 For the separate Linux host supervisor check (never count this as Android evidence):
 
 ```sh
@@ -75,7 +88,8 @@ success requires an actual initialize response, not just exit code zero.
 - Runtime files are bounded, hashed and extracted to private staging before activation.
   Update rollback, corrupt-pack tests, low-space tests and hostile symlink chains still
   need a dedicated fault-injection suite before use with downloaded/user-supplied packs.
-- Only bundled, APK-signed fixture assets are accepted. There is no arbitrary pack import.
+- Only fixture contents matching the APK-signed manifest are accepted. A staged ZIP
+  is untrusted until its file hashes, paths and sizes are verified by the app.
 - No credentials are loaded; cloud/authenticated agent tasks remain not run.
 - x86_64 emulator findings cannot establish ARM64/JIT or current Android compatibility.
 - Android 11 can compare target-dependent W^X behavior, but cannot validate Android 16

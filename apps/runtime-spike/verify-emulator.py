@@ -34,16 +34,25 @@ def adb(*arguments, timeout=20):
 
 
 deadline = time.monotonic() + args.boot_timeout
+ready_samples = 0
 while time.monotonic() < deadline:
     try:
-        if adb("shell", "getprop", "sys.boot_completed").stdout.strip() == "1":
+        ready = (
+            adb("shell", "getprop", "sys.boot_completed").stdout.strip() == "1"
+            and adb("shell", "service", "check", "package").stdout.strip()
+            == "Service package: found"
+            and adb("shell", "service", "check", "activity").stdout.strip()
+            == "Service activity: found"
+        )
+        ready_samples = ready_samples + 1 if ready else 0
+        if ready_samples >= 2:
             break
     except subprocess.TimeoutExpired:
-        pass
+        ready_samples = 0
     time.sleep(10)
 else:
-    raise SystemExit("BLOCKED: emulator did not complete boot; no app checks claimed")
-print("Emulator boot complete", flush=True)
+    raise SystemExit("BLOCKED: emulator services did not stabilize; no app checks claimed")
+print("Emulator boot and package/activity services ready", flush=True)
 
 for target, suffix in ((28, "legacy"), (36, "modern")):
     apk = args.artifacts / f"runtime-spike-x86_64-target{target}.apk"
@@ -52,7 +61,12 @@ for target, suffix in ((28, "legacy"), (36, "modern")):
         apk_hash = hashlib.file_digest(stream, "sha256").hexdigest()
     with ZipFile(apk) as archive:
         expected_build = json.loads(archive.read("assets/build.json"))
-    previous = adb("exec-out", "run-as", package, "cat", "files/report.json")
+    try:
+        previous = adb("exec-out", "run-as", package, "cat", "files/report.json")
+    except subprocess.TimeoutExpired:
+        raise SystemExit(
+            "BLOCKED: app report probe timed out; refusing to accept stale evidence"
+        ) from None
     try:
         previous_run = json.loads(previous.stdout).get("startedAt")
     except ValueError:
