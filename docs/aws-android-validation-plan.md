@@ -1,17 +1,16 @@
 # Finish the runtime spike using AWS
 
-Decision date: 2026-10-17. Research and read-only host inspection completed;
-no infrastructure provisioned, instance restarted, or Device Farm run submitted.
-Android runtime feasibility remains unverified. See the
-[existing evidence](runtime-feasibility-results.md).
+Decision date: 2026-10-17. The existing VM remains a build host; no EC2
+resize, restart or new instance was needed. AWS sign-in was refreshed using the
+dedicated `phone-use-phase0` CLI profile, and the user-authorized Device Farm
+execution is now working. See the [execution results](runtime-feasibility-results.md)
+for the actual ARM64 findings and usage ledger.
 
-Execution preparation: the user subsequently approved up to $20 for Device Farm.
-The [Device Farm collector](../apps/runtime-spike/devicefarm/README.md) is implemented
-and its test ZIP built on AWS. Ruff and 58 host tests passed. AWS sign-in refresh
-is pending; the browser authorization flow stalled and the normal Console sign-in
-page was opened in Chrome. No Device Farm project, upload or run has been created
-at this checkpoint, so no Device Farm spend has started. The prior spending
-proposal below is now authorized within that $20 scope; do not ask for it again.
+The user approved up to $20 for Device Farm. The
+[collector](../apps/runtime-spike/devicefarm/README.md) runs the APK as an ordinary
+app UID on AWS-owned devices and collects its own JSON evidence. This authorization
+does not include EC2 provisioning, device-slot subscriptions or model inference.
+The original options analysis below is retained for reference.
 
 ## Recommendation
 
@@ -42,8 +41,10 @@ Read-only SSH, DMI, IMDSv2 identity metadata, process inspection and Android
 - No `/dev/kvm`; neither `vmx` nor `svm` exposed to the guest.
 - Emulator acceleration check: `KVM requires a CPU that supports vmx or svm`.
 - The existing `emulator-5554` and its reviewer bridge remain running.
-- SSH works. The local AWS CLI's STS identity request fails with
-  `InvalidClientTokenId`; the remote host has no AWS CLI on PATH.
+- SSH works. The original default AWS CLI profile failed with `InvalidClientTokenId`.
+  The dedicated `phone-use-phase0` browser-authenticated profile subsequently passed
+  STS and account/instance verification. The remote host has no AWS CLI on PATH;
+  only short-lived upload URLs, never credential caches, were sent there.
 
 The `Hypervisor vendor: KVM` field in `lscpu` describes the outer hypervisor; it
 does not mean this guest can create accelerated virtual machines. Installing

@@ -1,9 +1,10 @@
 # ARM64 Android runtime feasibility spike
 
-Status: the diagnostic harness and AWS APK builds are implemented. The
-[execution report](runtime-feasibility-results.md) records passing host checks and
-blocked Android execution; the runtime exit gate has not passed. The matrix below
-remains the required verification scope. Read the
+Status: the diagnostic harness and AWS APK builds are implemented, and AWS Device
+Farm has produced real ARM64 app-UID execution reports. The
+[execution report](runtime-feasibility-results.md) distinguishes verified capabilities
+from remaining runtime and beta gates. The matrix below remains the required
+verification scope. Read the
 [architecture decision](on-device-linux-plan.md) first. The spike should answer one
 question: can an ordinary, unrooted Android app reliably host the required local
 agent/tool subprocess chain under an explicitly chosen distribution model?
@@ -23,7 +24,9 @@ device, or an already-authorized suitable remote device. If none is available,
 report the device gate as blocked while completing builds and host-side checks.
 
 Do not borrow the development host's model credentials, operate personal app data,
-disable device security controls or purchase a new device service for this spike.
+disable device security controls or purchase a new device service without authorization.
+The user subsequently authorized up to $20 for AWS Device Farm, without their phone;
+this permits the bounded hosted-device runs described in the execution report.
 
 ## Smallest test application
 

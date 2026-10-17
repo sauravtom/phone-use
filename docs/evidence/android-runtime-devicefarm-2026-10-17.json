@@ -1,0 +1,928 @@
+{
+  "scope": "Sanitized diagnostic summary; raw app reports and logs stay outside Git",
+  "usage": {
+    "approvedBudgetUsd": 20,
+    "meteredMinutesRoundedSum": 3.66,
+    "standardRateUsdPerMinute": 0.17,
+    "standardRateEquivalentUsd": 0.62,
+    "trialMinutes": {
+      "total": 1000.0,
+      "remaining": 996.35
+    },
+    "activeRuns": 0
+  },
+  "runs": [
+    {
+      "label": "pixel10pro-final36",
+      "runId": "d47cfdaa-3e0d-4269-97ab-a8c1c821c58f",
+      "runResult": "FAILED",
+      "deviceMinutes": {
+        "total": 1.34,
+        "metered": 1.02,
+        "unmetered": 0.0
+      },
+      "collection": "complete",
+      "device": "Google Pixel 10 Pro",
+      "androidApi": 36,
+      "targetSdk": 36,
+      "abi": "arm64-v8a",
+      "build": {
+        "sourceCommit": "f21cf2cc5926cc4cd32687040fc429379e0857b8",
+        "abi": "arm64-v8a",
+        "targetSdk": 36,
+        "runtimeDelivery": "bundled",
+        "fixture": "Ubuntu noble packages; see packages.txt in runtime artifacts",
+        "warning": "Debug research APK, not a release app or security sandbox"
+      },
+      "runtimeManifestSha256": "c0603334576d9b4b2277b72c1bccd581d73e18039a547f974d50d7e28e7e84ca",
+      "submittedApkSha256": "a9ddcf35bcfec2ba39673628672f6d093dfb91942a569b770c4fd7b4821ce55a",
+      "selinux": "Enforcing",
+      "appReportSha256": "e800b3c7d331807bf1157572f631431039bdeb33abcbe9873410717b3698d463",
+      "checks": [
+        {
+          "name": "apk_native_exec",
+          "status": "passed",
+          "durationMs": 180,
+          "exitCode": 0
+        },
+        {
+          "name": "android_shell_child",
+          "status": "passed",
+          "durationMs": 205,
+          "exitCode": 0
+        },
+        {
+          "name": "writable_native_exec",
+          "status": "failed",
+          "durationMs": 181,
+          "exitCode": 126
+        },
+        {
+          "name": "timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1177,
+          "exitCode": 124
+        },
+        {
+          "name": "runtime_install",
+          "status": "passed",
+          "durationMs": 6372,
+          "exitCode": 0
+        },
+        {
+          "name": "ubuntu_loader",
+          "status": "failed",
+          "durationMs": 184,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_bash",
+          "status": "failed",
+          "durationMs": 191,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_python",
+          "status": "failed",
+          "durationMs": 191,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_absolute_child",
+          "status": "failed",
+          "durationMs": 194,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_explicit_loader_child",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_git_version",
+          "status": "failed",
+          "durationMs": 195,
+          "exitCode": 126
+        },
+        {
+          "name": "android_https",
+          "status": "passed",
+          "durationMs": 245,
+          "exitCode": 200
+        },
+        {
+          "name": "ubuntu_https",
+          "status": "failed",
+          "durationMs": 199,
+          "exitCode": 126
+        },
+        {
+          "name": "git_init",
+          "status": "failed",
+          "durationMs": 189,
+          "exitCode": 126
+        },
+        {
+          "name": "git_add",
+          "status": "failed",
+          "durationMs": 188,
+          "exitCode": 126
+        },
+        {
+          "name": "git_commit",
+          "status": "failed",
+          "durationMs": 195,
+          "exitCode": 126
+        },
+        {
+          "name": "git_diff",
+          "status": "failed",
+          "durationMs": 196,
+          "exitCode": 126
+        },
+        {
+          "name": "git_clone",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "proot_version",
+          "status": "passed",
+          "durationMs": 195,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_child_chain",
+          "status": "passed",
+          "durationMs": 356,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_file_roundtrip",
+          "status": "passed",
+          "durationMs": 518,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_shebang_symlink",
+          "status": "passed",
+          "durationMs": 660,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_git_workflow",
+          "status": "passed",
+          "durationMs": 1374,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_dns_config",
+          "status": "passed",
+          "durationMs": 11,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_dns",
+          "status": "passed",
+          "durationMs": 512,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_https",
+          "status": "passed",
+          "durationMs": 916,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_git_https_clone",
+          "status": "passed",
+          "durationMs": 1971,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1191,
+          "exitCode": 124
+        },
+        {
+          "name": "proot_timeout_descendant_cleanup",
+          "status": "passed",
+          "durationMs": 3500,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_version",
+          "status": "passed",
+          "durationMs": 215,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_protocol",
+          "status": "passed",
+          "durationMs": 642,
+          "exitCode": 0
+        },
+        {
+          "name": "codex_version",
+          "status": "failed",
+          "durationMs": 199,
+          "exitCode": 126
+        },
+        {
+          "name": "codex_protocol",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "proot_codex_protocol",
+          "status": "failed",
+          "durationMs": 11653,
+          "exitCode": 128
+        },
+        {
+          "name": "proot_codex_exec_android_sandbox",
+          "status": "passed",
+          "durationMs": 1664,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_codex_exec_readonly",
+          "status": "failed",
+          "durationMs": 1578,
+          "exitCode": 0
+        },
+        {
+          "name": "authenticated_agent_task",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "claude_runtime",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "lifecycle_storage_privacy_matrix",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        }
+      ],
+      "nativeProbe": "uid=10307 pid=19757 machine=aarch64 page_size=4096",
+      "lifecycle": {
+        "backgroundForeground": "passed",
+        "completedReportRestart": "passed",
+        "interruptedReportRestart": "passed"
+      }
+    },
+    {
+      "label": "pixel8-expanded36",
+      "runId": "c1b45b2d-725b-4482-9320-714f1994ce47",
+      "runResult": "FAILED",
+      "deviceMinutes": {
+        "total": 1.29,
+        "metered": 1.0,
+        "unmetered": 0.0
+      },
+      "collection": "complete",
+      "device": "Google Pixel 8",
+      "androidApi": 34,
+      "targetSdk": 36,
+      "abi": "arm64-v8a",
+      "build": {
+        "sourceCommit": "ec20071c961169dfc15ac4b236895944e1628afd",
+        "abi": "arm64-v8a",
+        "targetSdk": 36,
+        "runtimeDelivery": "bundled",
+        "fixture": "Ubuntu noble packages; see packages.txt in runtime artifacts",
+        "warning": "Debug research APK, not a release app or security sandbox"
+      },
+      "runtimeManifestSha256": "253fb46f7fc6430e15d4c3eee6937e6f36ee62938ac41e94f7ce9cfa7c230e1e",
+      "submittedApkSha256": "eb1992269874fa97ad8e6d3c6440ccd0a8d7f839b18316444f0c47db4b3c93a7",
+      "selinux": "Enforcing",
+      "appReportSha256": "32bf324abdf711f6e77cfcbb11be13e8537794d48e58ae4c09bd593169eea60a",
+      "checks": [
+        {
+          "name": "apk_native_exec",
+          "status": "passed",
+          "durationMs": 178,
+          "exitCode": 0
+        },
+        {
+          "name": "android_shell_child",
+          "status": "passed",
+          "durationMs": 215,
+          "exitCode": 0
+        },
+        {
+          "name": "writable_native_exec",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1173,
+          "exitCode": 124
+        },
+        {
+          "name": "runtime_install",
+          "status": "passed",
+          "durationMs": 18632,
+          "exitCode": 0
+        },
+        {
+          "name": "ubuntu_loader",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_bash",
+          "status": "failed",
+          "durationMs": 184,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_python",
+          "status": "failed",
+          "durationMs": 189,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_absolute_child",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_explicit_loader_child",
+          "status": "failed",
+          "durationMs": 190,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_git_version",
+          "status": "failed",
+          "durationMs": 197,
+          "exitCode": 126
+        },
+        {
+          "name": "android_https",
+          "status": "passed",
+          "durationMs": 416,
+          "exitCode": 200
+        },
+        {
+          "name": "ubuntu_https",
+          "status": "failed",
+          "durationMs": 203,
+          "exitCode": 126
+        },
+        {
+          "name": "git_init",
+          "status": "failed",
+          "durationMs": 188,
+          "exitCode": 126
+        },
+        {
+          "name": "git_add",
+          "status": "failed",
+          "durationMs": 189,
+          "exitCode": 126
+        },
+        {
+          "name": "git_commit",
+          "status": "failed",
+          "durationMs": 191,
+          "exitCode": 126
+        },
+        {
+          "name": "git_diff",
+          "status": "failed",
+          "durationMs": 187,
+          "exitCode": 126
+        },
+        {
+          "name": "git_clone",
+          "status": "failed",
+          "durationMs": 195,
+          "exitCode": 126
+        },
+        {
+          "name": "proot_version",
+          "status": "passed",
+          "durationMs": 191,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_child_chain",
+          "status": "passed",
+          "durationMs": 292,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_file_roundtrip",
+          "status": "passed",
+          "durationMs": 435,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_git_workflow",
+          "status": "failed",
+          "durationMs": 553,
+          "exitCode": 128
+        },
+        {
+          "name": "proot_dns_config",
+          "status": "passed",
+          "durationMs": 14,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_dns",
+          "status": "passed",
+          "durationMs": 386,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_https",
+          "status": "passed",
+          "durationMs": 398,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_git_https_clone",
+          "status": "passed",
+          "durationMs": 1838,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1187,
+          "exitCode": 124
+        },
+        {
+          "name": "proot_timeout_descendant_cleanup",
+          "status": "passed",
+          "durationMs": 3500,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_version",
+          "status": "passed",
+          "durationMs": 193,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_protocol",
+          "status": "passed",
+          "durationMs": 640,
+          "exitCode": 0
+        },
+        {
+          "name": "codex_version",
+          "status": "failed",
+          "durationMs": 191,
+          "exitCode": 126
+        },
+        {
+          "name": "codex_protocol",
+          "status": "failed",
+          "durationMs": 195,
+          "exitCode": 126
+        },
+        {
+          "name": "proot_codex_protocol",
+          "status": "passed",
+          "durationMs": 3650,
+          "exitCode": 0
+        },
+        {
+          "name": "authenticated_agent_task",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "claude_runtime",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "lifecycle_storage_privacy_matrix",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        }
+      ],
+      "nativeProbe": "uid=10284 pid=28017 machine=aarch64 page_size=4096",
+      "lifecycle": {
+        "backgroundForeground": "passed",
+        "completedReportRestart": "passed",
+        "interruptedReportRestart": "passed"
+      }
+    },
+    {
+      "label": "pixel8-target28",
+      "runId": "34bf6c74-3fa9-48f3-8f35-62530ac505c0",
+      "runResult": "FAILED",
+      "deviceMinutes": {
+        "total": 1.08,
+        "metered": 0.77,
+        "unmetered": 0.0
+      },
+      "collection": "complete",
+      "device": "Google Pixel 8",
+      "androidApi": 34,
+      "targetSdk": 28,
+      "abi": "arm64-v8a",
+      "build": {
+        "sourceCommit": "d9d59ae1943fb0ed7d30b3682721c7970794d83f",
+        "abi": "arm64-v8a",
+        "targetSdk": 28,
+        "fixture": "Ubuntu noble packages; see packages.txt in runtime artifacts",
+        "warning": "Debug research APK, not a release app or security sandbox"
+      },
+      "runtimeManifestSha256": "253fb46f7fc6430e15d4c3eee6937e6f36ee62938ac41e94f7ce9cfa7c230e1e",
+      "submittedApkSha256": "bbdec2a743e767f1facd4aea32a52a7d86260359b7030d45ca3f12e71b310b0e",
+      "selinux": "Enforcing",
+      "appReportSha256": "4752eaf2e56801a307a032f8e5b542285716473989f39fe53a1b195c2b71670d",
+      "checks": [
+        {
+          "name": "apk_native_exec",
+          "status": "passed",
+          "durationMs": 176,
+          "exitCode": 0
+        },
+        {
+          "name": "android_shell_child",
+          "status": "passed",
+          "durationMs": 219,
+          "exitCode": 0
+        },
+        {
+          "name": "writable_native_exec",
+          "status": "passed",
+          "durationMs": 191,
+          "exitCode": 0
+        },
+        {
+          "name": "timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1179,
+          "exitCode": 124
+        },
+        {
+          "name": "runtime_install",
+          "status": "passed",
+          "durationMs": 16176,
+          "exitCode": 0
+        },
+        {
+          "name": "ubuntu_loader",
+          "status": "passed",
+          "durationMs": 186,
+          "exitCode": 0
+        },
+        {
+          "name": "ubuntu_bash",
+          "status": "failed",
+          "durationMs": 196,
+          "exitCode": 159
+        },
+        {
+          "name": "ubuntu_python",
+          "status": "failed",
+          "durationMs": 195,
+          "exitCode": 159
+        },
+        {
+          "name": "direct_absolute_child",
+          "status": "failed",
+          "durationMs": 196,
+          "exitCode": 159
+        },
+        {
+          "name": "direct_explicit_loader_child",
+          "status": "failed",
+          "durationMs": 190,
+          "exitCode": 159
+        },
+        {
+          "name": "ubuntu_git_version",
+          "status": "failed",
+          "durationMs": 192,
+          "exitCode": 159
+        },
+        {
+          "name": "android_https",
+          "status": "passed",
+          "durationMs": 3664,
+          "exitCode": 200
+        },
+        {
+          "name": "ubuntu_https",
+          "status": "failed",
+          "durationMs": 190,
+          "exitCode": 159
+        },
+        {
+          "name": "git_init",
+          "status": "failed",
+          "durationMs": 189,
+          "exitCode": 159
+        },
+        {
+          "name": "git_add",
+          "status": "failed",
+          "durationMs": 183,
+          "exitCode": 159
+        },
+        {
+          "name": "git_commit",
+          "status": "failed",
+          "durationMs": 187,
+          "exitCode": 159
+        },
+        {
+          "name": "git_diff",
+          "status": "failed",
+          "durationMs": 187,
+          "exitCode": 159
+        },
+        {
+          "name": "git_clone",
+          "status": "failed",
+          "durationMs": 190,
+          "exitCode": 159
+        },
+        {
+          "name": "proot_version",
+          "status": "passed",
+          "durationMs": 190,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_child_chain",
+          "status": "passed",
+          "durationMs": 310,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_version",
+          "status": "passed",
+          "durationMs": 212,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_protocol",
+          "status": "passed",
+          "durationMs": 562,
+          "exitCode": 0
+        },
+        {
+          "name": "codex_version",
+          "status": "passed",
+          "durationMs": 191,
+          "exitCode": 0
+        },
+        {
+          "name": "codex_protocol",
+          "status": "passed",
+          "durationMs": 349,
+          "exitCode": 0
+        },
+        {
+          "name": "authenticated_agent_task",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "claude_runtime",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "lifecycle_storage_privacy_matrix",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        }
+      ],
+      "nativeProbe": "uid=10273 pid=26189 machine=aarch64 page_size=4096",
+      "lifecycle": {
+        "backgroundForeground": "not_run",
+        "completedReportRestart": "not_run",
+        "interruptedReportRestart": "not_run"
+      }
+    },
+    {
+      "label": "pixel8-target36",
+      "runId": "e30ca6f6-99cf-49cd-8c27-ffe522f21251",
+      "runResult": "FAILED",
+      "deviceMinutes": {
+        "total": 1.14,
+        "metered": 0.87,
+        "unmetered": 0.0
+      },
+      "collection": "complete",
+      "device": "Google Pixel 8",
+      "androidApi": 34,
+      "targetSdk": 36,
+      "abi": "arm64-v8a",
+      "build": {
+        "sourceCommit": "d9d59ae1943fb0ed7d30b3682721c7970794d83f",
+        "abi": "arm64-v8a",
+        "targetSdk": 36,
+        "fixture": "Ubuntu noble packages; see packages.txt in runtime artifacts",
+        "warning": "Debug research APK, not a release app or security sandbox"
+      },
+      "runtimeManifestSha256": "253fb46f7fc6430e15d4c3eee6937e6f36ee62938ac41e94f7ce9cfa7c230e1e",
+      "submittedApkSha256": "91d84ce7270dc69487c48f29680081172d3f8f9f03a5dcfab6e56b1e2f38a2a3",
+      "selinux": "Enforcing",
+      "appReportSha256": "adf983a71f383a8e2bd5318e5a61575b8284a6665396675176196c48400e7ab1",
+      "checks": [
+        {
+          "name": "apk_native_exec",
+          "status": "passed",
+          "durationMs": 178,
+          "exitCode": 0
+        },
+        {
+          "name": "android_shell_child",
+          "status": "passed",
+          "durationMs": 209,
+          "exitCode": 0
+        },
+        {
+          "name": "writable_native_exec",
+          "status": "failed",
+          "durationMs": 181,
+          "exitCode": 126
+        },
+        {
+          "name": "timeout_owned_group",
+          "status": "passed",
+          "durationMs": 1168,
+          "exitCode": 124
+        },
+        {
+          "name": "runtime_install",
+          "status": "passed",
+          "durationMs": 17482,
+          "exitCode": 0
+        },
+        {
+          "name": "ubuntu_loader",
+          "status": "failed",
+          "durationMs": 180,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_bash",
+          "status": "failed",
+          "durationMs": 193,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_python",
+          "status": "failed",
+          "durationMs": 184,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_absolute_child",
+          "status": "failed",
+          "durationMs": 186,
+          "exitCode": 126
+        },
+        {
+          "name": "direct_explicit_loader_child",
+          "status": "failed",
+          "durationMs": 184,
+          "exitCode": 126
+        },
+        {
+          "name": "ubuntu_git_version",
+          "status": "failed",
+          "durationMs": 182,
+          "exitCode": 126
+        },
+        {
+          "name": "android_https",
+          "status": "passed",
+          "durationMs": 385,
+          "exitCode": 200
+        },
+        {
+          "name": "ubuntu_https",
+          "status": "failed",
+          "durationMs": 200,
+          "exitCode": 126
+        },
+        {
+          "name": "git_init",
+          "status": "failed",
+          "durationMs": 199,
+          "exitCode": 126
+        },
+        {
+          "name": "git_add",
+          "status": "failed",
+          "durationMs": 194,
+          "exitCode": 126
+        },
+        {
+          "name": "git_commit",
+          "status": "failed",
+          "durationMs": 186,
+          "exitCode": 126
+        },
+        {
+          "name": "git_diff",
+          "status": "failed",
+          "durationMs": 188,
+          "exitCode": 126
+        },
+        {
+          "name": "git_clone",
+          "status": "failed",
+          "durationMs": 202,
+          "exitCode": 126
+        },
+        {
+          "name": "proot_version",
+          "status": "passed",
+          "durationMs": 205,
+          "exitCode": 0
+        },
+        {
+          "name": "proot_child_chain",
+          "status": "passed",
+          "durationMs": 362,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_version",
+          "status": "passed",
+          "durationMs": 322,
+          "exitCode": 0
+        },
+        {
+          "name": "packaged_codex_protocol",
+          "status": "passed",
+          "durationMs": 871,
+          "exitCode": 0
+        },
+        {
+          "name": "codex_version",
+          "status": "failed",
+          "durationMs": 201,
+          "exitCode": 126
+        },
+        {
+          "name": "codex_protocol",
+          "status": "failed",
+          "durationMs": 191,
+          "exitCode": 126
+        },
+        {
+          "name": "authenticated_agent_task",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "claude_runtime",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        },
+        {
+          "name": "lifecycle_storage_privacy_matrix",
+          "status": "not_run",
+          "durationMs": 0,
+          "exitCode": -1
+        }
+      ],
+      "nativeProbe": "uid=10272 pid=25448 machine=aarch64 page_size=4096",
+      "lifecycle": {
+        "backgroundForeground": "not_run",
+        "completedReportRestart": "not_run",
+        "interruptedReportRestart": "not_run"
+      }
+    }
+  ]
+}

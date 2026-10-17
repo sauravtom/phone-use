@@ -41,8 +41,9 @@ Use an isolated project named for the phone-use phase-0 spike. Upload:
 Wait for all three uploads to become `SUCCEEDED`. Schedule a custom
 `APPIUM_PYTHON` run with exactly one device, `jobTimeoutMinutes: 20` and metered
 billing. The custom test uses the host's ADB directly; no Appium server or driver
-session is needed. Provider validation and execution of this configuration must
-be verified on the first submission; local pytest success does not establish that.
+session is needed. This custom-host configuration was verified on the first
+Pixel 8 submissions on 2026-10-17; see the execution report for individual probe
+results. Local pytest success alone does not establish Android execution.
 
 Do not log presigned upload/download URLs or credentials. If uploading the APK
 directly from the build VM, pass only the short-lived upload URL to that operation;
@@ -54,6 +55,10 @@ do not transfer the user's CLI credential cache or signing keys.
 - `collection.json`: Device Farm identity, original/service APK hashes, collected
   device properties, report completeness and failed/not-run check names.
 - `installed-package.txt`: installed target/version/package information.
+- `interrupted-report.json`: app-written recovery state after stopping a synthetic
+  in-progress run. Expanded collectors also record a three-second HOME/foreground
+  transition and completed-report recovery in `collection.json`. These short checks
+  do not prove long-running background execution, Doze handling or user cancellation.
 - `logcat.txt`, `activity.txt`, `junit.xml`: bounded supporting diagnostics.
 
 Public Device Farm re-signs APKs, so submitted and service hashes may differ.

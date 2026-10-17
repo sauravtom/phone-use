@@ -96,3 +96,28 @@ success requires an actual initialize response, not just exit code zero.
   lifecycle, kernel or distribution behavior merely by setting targetSdk 36.
 - Native execution is scoped by the Android app sandbox. PRoot, if tested, only changes
   filesystem views and is not additional isolation between agents and app credentials.
+
+## AWS-hosted ARM64 evidence
+
+The [Device Farm adapter](devicefarm/README.md) exercises bundled builds on
+AWS-owned devices, without a personal phone or local emulator. The expanded APK
+adds PRoot file round trips, Git init/add/commit/diff/local clone, active Android DNS
+configuration, DNS/TLS/public Git clone, a timed descendant marker and Codex
+initialization inside PRoot. Native Android DNS configuration requires only the
+normal `ACCESS_NETWORK_STATE` permission; no broad storage permission is requested.
+
+Keep the original failing direct-loader probes in the report as comparison data.
+Use the [execution report](../../docs/runtime-feasibility-results.md) for verified
+results rather than assuming an implemented probe passed. The expanded collector
+checks short background/foreground, completed report restart and interrupted
+report recovery separately from runtime probes.
+
+The final Codex probes use the pinned 0.163.0 binary's generated JSON schema
+(`app-server generate-json-schema --out ...`) for `command/exec`. They initialize,
+send `initialized`, then request a bounded bash → Python → Git command and require
+an actual id-2 response, zero exit code and fixture output. Two independent policies
+are tested: `externalSandbox`, meaning only the existing Android app-UID boundary
+for this synthetic fixture, and Codex `readOnly`. Neither is an automatic fallback.
+The former does not establish per-workspace isolation; even a successful read-only
+launch would still need a separate write-denial test. No model turn or credentials
+are involved. PRoot's Codex home is `/home/spike`, inside this app's private rootfs.
