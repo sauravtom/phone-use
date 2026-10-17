@@ -157,12 +157,17 @@ def test_runtime():
             validate_report(candidate, expected, None, package)
             report = candidate
             if background_generation is not None:
-                assert report["startedAt"] == background_generation, "Background resume duplicated run"
+                assert report["startedAt"] == background_generation, (
+                    "Background resume duplicated run"
+                )
             if background_generation is None and report["state"] == "running":
                 background_generation = report["startedAt"]
                 adb("shell", "input", "keyevent", "KEYCODE_HOME")
                 time.sleep(3)
-                adb("shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity")
+                adb(
+                    "shell", "am", "start", "-W", "-n",
+                    package + "/dev.phoneuse.spike.MainActivity",
+                )
                 metadata["backgroundForeground"] = "attempted"
             report_path.write_text(json.dumps(report, indent=2) + "\n")
             for check in report["checks"][seen:]:
@@ -198,7 +203,9 @@ def test_runtime():
         deadline = time.monotonic() + 15
         interrupted_generation = None
         while time.monotonic() < deadline:
-            current = json.loads(adb("exec-out", "run-as", package, "cat", "files/report.json").stdout)
+            current = json.loads(
+                adb("exec-out", "run-as", package, "cat", "files/report.json").stdout
+            )
             if current["startedAt"] != report["startedAt"] and current["state"] == "running":
                 interrupted_generation = current["startedAt"]
                 break
@@ -206,9 +213,12 @@ def test_runtime():
         assert interrupted_generation is not None, "No fresh running generation to interrupt"
         adb("shell", "am", "force-stop", package)
         adb("shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity")
-        recovered = json.loads(adb("exec-out", "run-as", package, "cat", "files/report.json").stdout)
+        recovered = json.loads(
+            adb("exec-out", "run-as", package, "cat", "files/report.json").stdout
+        )
         (logs / "interrupted-report.json").write_text(json.dumps(recovered, indent=2) + "\n")
-        assert recovered["startedAt"] == interrupted_generation and recovered["state"] == "interrupted"
+        assert recovered["startedAt"] == interrupted_generation
+        assert recovered["state"] == "interrupted"
         metadata["interruptedReportRestart"] = "passed"
         save_metadata()
         # A provider PASSED status must never hide a failed runtime probe.
