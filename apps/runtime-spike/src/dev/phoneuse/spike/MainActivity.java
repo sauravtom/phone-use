@@ -94,6 +94,10 @@ public class MainActivity extends Activity {
     private void diagnostics() throws Exception {
         root = new File(getFilesDir(), "rootfs");
         runner = getApplicationInfo().nativeLibraryDir + "/libspike_runner.so";
+        File compatibility = new File(getFilesDir(), "native-links"); compatibility.mkdirs();
+        File talloc = new File(compatibility, "libtalloc.so.2");
+        if (!talloc.exists() && new File(getApplicationInfo().nativeLibraryDir + "/libtalloc.so").exists())
+            Os.symlink(getApplicationInfo().nativeLibraryDir + "/libtalloc.so", talloc.toString());
         boolean arm = Build.SUPPORTED_ABIS[0].startsWith("arm64");
         String arch = arm ? "aarch64-linux-gnu" : "x86_64-linux-gnu";
         loader = root + "/usr/lib/" + arch + "/" + (arm ? "ld-linux-aarch64.so.1" : "ld-linux-x86-64.so.2");
@@ -171,7 +175,7 @@ public class MainActivity extends Activity {
             env.put("SSL_CERT_FILE", file("etc/ssl/certs/ca-certificates.crt"));
             env.put("CURL_CA_BUNDLE", file("etc/ssl/certs/ca-certificates.crt"));
             env.put("SPIKE_ROOT", root.toString()); env.put("SPIKE_LOADER", loader); env.put("SPIKE_LIBS", libs);
-            env.put("LD_LIBRARY_PATH", getApplicationInfo().nativeLibraryDir);
+            env.put("LD_LIBRARY_PATH", new File(getFilesDir(), "native-links") + ":" + getApplicationInfo().nativeLibraryDir);
             env.put("PROOT_TMP_DIR", getCacheDir().toString());
             env.put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot_loader.so");
             env.put("PROOT_NO_SECCOMP", "1");
