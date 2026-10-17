@@ -159,7 +159,7 @@ public class MainActivity extends Activity {
         String proot = getApplicationInfo().nativeLibraryDir + "/libproot.so";
         if (new File(proot).exists()) {
             check("proot_version", 10, null, proot, "--version");
-            check("proot_child_chain", 40, null, proot, "-r", root.toString(), "-b", "/dev", "-b", "/proc", "-b", "/system", "-w", "/tmp", "/usr/bin/bash", "-c", "/usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
+            check("proot_child_chain", 40, null, proot, "-r", root.toString(), "-b", "/dev", "-b", "/proc", "-b", "/system", "-w", "/tmp", "/usr/bin/bash", "-c", "set -eu; /usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
         } else add("proot_child_chain", "not_run", "PRoot binary not included in this build", 0, -1);
         String codex = file("opt/codex");
         String packagedCodex = getApplicationInfo().nativeLibraryDir + "/libcodex.so";
@@ -198,6 +198,13 @@ public class MainActivity extends Activity {
             env.put("PROOT_TMP_DIR", getCacheDir().toString());
             env.put("PROOT_LOADER", getApplicationInfo().nativeLibraryDir + "/libproot_loader.so");
             env.put("PROOT_NO_SECCOMP", "1");
+            if (command[0].endsWith("/libproot.so")) {
+                env.put("HOME", "/tmp"); env.put("TMPDIR", "/tmp");
+                env.put("PYTHONHOME", "/usr"); env.put("GIT_EXEC_PATH", "/usr/lib/git-core");
+                env.put("GIT_TEMPLATE_DIR", "/usr/share/git-core/templates");
+                env.put("SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt");
+                env.put("CURL_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt");
+            }
             process = builder.start();
             boolean protocolOk = false;
             String text;
