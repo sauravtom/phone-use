@@ -100,6 +100,9 @@ def test_runtime():
         "collection": "started",
         "scope": "AWS-hosted ARM64 Android; Activity executes all runtime diagnostics",
         "runtimeGate": "not_evaluated",
+        "backgroundForeground": "not_run",
+        "completedReportRestart": "not_run",
+        "interruptedReportRestart": "not_run",
     }
     report_path = logs / "app-report.json"
     metadata_path = logs / "collection.json"
@@ -140,6 +143,7 @@ def test_runtime():
         assert "Error" not in launched.stdout + launched.stderr, launched.stdout
         deadline = time.monotonic() + 900
         seen = 0
+        background_generation = None
         report = None
         while time.monotonic() < deadline:
             time.sleep(3)
@@ -152,6 +156,14 @@ def test_runtime():
                 continue
             validate_report(candidate, expected, None, package)
             report = candidate
+            if background_generation is not None:
+                assert report["startedAt"] == background_generation, "Background resume duplicated run"
+            if background_generation is None and report["state"] == "running":
+                background_generation = report["startedAt"]
+                adb("shell", "input", "keyevent", "KEYCODE_HOME")
+                time.sleep(3)
+                adb("shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity")
+                metadata["backgroundForeground"] = "attempted"
             report_path.write_text(json.dumps(report, indent=2) + "\n")
             for check in report["checks"][seen:]:
                 print(f"{check['name']}: {check['status']}", flush=True)
@@ -162,6 +174,8 @@ def test_runtime():
         assert report["state"] == "finished", "Partial or interrupted report; see artifacts"
         assert report.get("runtimeManifestSha256") == expected["runtimeManifestSha256"]
         assert report["checks"], "Empty diagnostic report"
+        if background_generation is not None:
+            metadata["backgroundForeground"] = "passed"
         metadata["collection"] = "complete"
         metadata["failedChecks"] = [c["name"] for c in report["checks"] if c["status"] == "failed"]
         metadata["notRunChecks"] = [c["name"] for c in report["checks"] if c["status"] == "not_run"]
@@ -174,6 +188,28 @@ def test_runtime():
         )
         assert recovered == report, "Completed report changed or disappeared after restart"
         metadata["completedReportRestart"] = "passed"
+        save_metadata()
+        # Kill only this synthetic app during another run, then require interrupted recovery.
+        adb("shell", "am", "force-stop", package)
+        adb(
+            "shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity",
+            "--ez", "runDiagnostics", "true",
+        )
+        deadline = time.monotonic() + 15
+        interrupted_generation = None
+        while time.monotonic() < deadline:
+            current = json.loads(adb("exec-out", "run-as", package, "cat", "files/report.json").stdout)
+            if current["startedAt"] != report["startedAt"] and current["state"] == "running":
+                interrupted_generation = current["startedAt"]
+                break
+            time.sleep(0.2)
+        assert interrupted_generation is not None, "No fresh running generation to interrupt"
+        adb("shell", "am", "force-stop", package)
+        adb("shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity")
+        recovered = json.loads(adb("exec-out", "run-as", package, "cat", "files/report.json").stdout)
+        (logs / "interrupted-report.json").write_text(json.dumps(recovered, indent=2) + "\n")
+        assert recovered["startedAt"] == interrupted_generation and recovered["state"] == "interrupted"
+        metadata["interruptedReportRestart"] = "passed"
         save_metadata()
         # A provider PASSED status must never hide a failed runtime probe.
         assert not metadata["failedChecks"], "Runtime probes failed; inspect app-report.json"
