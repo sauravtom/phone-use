@@ -59,6 +59,7 @@ def main():
         package="{package}" android:versionCode="1" android:versionName="0.1">
       <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="{args.target}"/>
       <uses-permission android:name="android.permission.INTERNET"/>
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
       <application android:label="Runtime spike {args.target}" android:debuggable="true"
         android:allowBackup="false" android:extractNativeLibs="true"
         android:usesCleartextTraffic="false"

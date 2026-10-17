@@ -159,7 +159,25 @@ public class MainActivity extends Activity {
         String proot = getApplicationInfo().nativeLibraryDir + "/libproot.so";
         if (new File(proot).exists()) {
             check("proot_version", 10, null, proot, "--version");
-            check("proot_child_chain", 40, null, proot, "-r", root.toString(), "-b", "/dev", "-b", "/proc", "-b", "/system", "-w", "/tmp", "/usr/bin/bash", "-c", "set -eu; /usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
+            prootCheck("proot_child_chain", 40, null, "/usr/bin/bash", "-c", "set -eu; /usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
+            prootCheck("proot_file_roundtrip", 20, null, "/usr/bin/python3", "-c",
+                "import json,pathlib; p=pathlib.Path('/tmp/fixture with spaces.json'); p.write_text(json.dumps({'ok':True})); assert json.loads(p.read_text())['ok']; print('FILE_ROUNDTRIP_OK')");
+            prootCheck("proot_git_workflow", 40, null, "/usr/bin/bash", "-c",
+                "set -eu; repo=$(mktemp -d /tmp/git-fixture.XXXXXX); git init \"$repo\"; cd \"$repo\"; printf 'before\\n' > 'file with spaces.txt'; git add .; git -c user.name=Spike -c user.email=spike@example.invalid -c commit.gpgsign=false commit -m fixture; printf 'after\\n' > 'file with spaces.txt'; git diff --exit-code > /tmp/spike-diff && exit 9; git diff; git clone --no-hardlinks \"$repo\" \"$repo-clone\"; test \"$(cat \"$repo-clone/file with spaces.txt\")\" = before; printf 'GIT_WORKFLOW_OK\\n'");
+            configureDns();
+            prootCheck("proot_dns", 20, null, "/usr/bin/python3", "-c",
+                "import socket; addresses=socket.getaddrinfo('example.com',443); assert addresses; print('DNS_OK',len(addresses))");
+            prootCheck("proot_https", 40, null, "/usr/bin/curl", "--fail", "--max-time", "25", "--head", "https://example.com");
+            prootCheck("proot_git_https_clone", 60, null, "/usr/bin/bash", "-c",
+                "set -eu; dest=$(mktemp -d /tmp/remote-clone.XXXXXX); git clone --depth 1 https://github.com/octocat/Hello-World.git \"$dest\"; git -C \"$dest\" rev-parse --verify HEAD");
+            new File(root, "tmp/timeout-descendant-marker").delete();
+            prootCheck("proot_timeout_owned_group", 1, null, "/usr/bin/bash", "-c",
+                "(echo DESCENDANT_READY; sleep 3; echo LEAKED > /tmp/timeout-descendant-marker) & wait");
+            Thread.sleep(3500);
+            JSONObject timeoutResult = report.getJSONArray("checks").getJSONObject(report.getJSONArray("checks").length()-1);
+            boolean timeoutStarted = "passed".equals(timeoutResult.getString("status"));
+            add("proot_timeout_descendant_cleanup", !timeoutStarted ? "not_run" : new File(root, "tmp/timeout-descendant-marker").exists() ? "failed" : "passed",
+                "Delayed fixture descendant must not survive timeout; requires confirmed child startup", 3500, 0);
         } else add("proot_child_chain", "not_run", "PRoot binary not included in this build", 0, -1);
         String codex = file("opt/codex");
         String packagedCodex = getApplicationInfo().nativeLibraryDir + "/libcodex.so";
@@ -173,9 +191,31 @@ public class MainActivity extends Activity {
             check("codex_protocol", 30, initialize,
                   codex, "app-server", "--listen", "stdio://");
         } else add("codex_protocol", "not_run", "Codex binary not included in this build", 0, -1);
+        if (new File(proot).exists())
+            prootCheck("proot_codex_protocol", 30, initialize, "/opt/codex", "app-server", "--listen", "stdio://");
         add("authenticated_agent_task", "not_run", "No provider credentials requested or copied", 0, -1);
         add("claude_runtime", "not_run", "Claude runtime not included in this first probe", 0, -1);
         add("lifecycle_storage_privacy_matrix", "not_run", "Requires separate fault-injection and lifecycle validation", 0, -1);
+    }
+    private void configureDns() {
+        long start = System.currentTimeMillis();
+        try {
+            android.net.ConnectivityManager manager = (android.net.ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+            android.net.LinkProperties properties = manager.getLinkProperties(manager.getActiveNetwork());
+            if (properties == null || properties.getDnsServers().isEmpty()) throw new IOException("No active network DNS servers");
+            StringBuilder config = new StringBuilder("options timeout:3 attempts:2\n");
+            for (java.net.InetAddress address : properties.getDnsServers())
+                config.append("nameserver ").append(address.getHostAddress()).append('\n');
+            try (FileWriter out = new FileWriter(new File(root, "etc/resolv.conf"))) { out.write(config.toString()); }
+            add("proot_dns_config", "passed", "Copied active Android network DNS servers to the synthetic rootfs", System.currentTimeMillis()-start, 0);
+        } catch (Exception e) { add("proot_dns_config", "failed", e.toString(), System.currentTimeMillis()-start, -1); }
+    }
+    private void prootCheck(String name, int timeout, String input, String... command) {
+        ArrayList<String> args = new ArrayList<>(Arrays.asList(
+            getApplicationInfo().nativeLibraryDir + "/libproot.so", "-r", root.toString(),
+            "-b", "/dev", "-b", "/proc", "-b", "/system", "-w", "/tmp"));
+        Collections.addAll(args, command);
+        check(name, timeout, input, args.toArray(new String[0]));
     }
     private String file(String name) { return new File(root, name).toString(); }
     private void check(String name, int timeout, String input, String... command) {
@@ -200,6 +240,7 @@ public class MainActivity extends Activity {
             env.put("PROOT_NO_SECCOMP", "1");
             if (command[0].endsWith("/libproot.so")) {
                 env.put("HOME", "/tmp"); env.put("TMPDIR", "/tmp");
+                env.put("PATH", "/usr/bin:/bin:/system/bin");
                 env.put("PYTHONHOME", "/usr"); env.put("GIT_EXEC_PATH", "/usr/lib/git-core");
                 env.put("GIT_TEMPLATE_DIR", "/usr/share/git-core/templates");
                 env.put("SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt");
@@ -232,8 +273,10 @@ public class MainActivity extends Activity {
                 text = transcript.toString();
             }
             int exit = process.waitFor(); process = null;
-            boolean ok = name.equals("timeout_owned_group") ? exit == 124 : exit == 0;
+            boolean ok = name.endsWith("timeout_owned_group") ? exit == 124 : exit == 0;
             if (input != null) ok = ok && protocolOk;
+            if (name.equals("proot_timeout_owned_group")) ok = ok && text.contains("DESCENDANT_READY");
+            if (name.equals("proot_git_workflow")) ok = ok && text.contains("+after") && text.contains("GIT_WORKFLOW_OK");
             if (name.equals("git_diff")) ok = ok && text.contains("+changed synthetic fixture");
             add(name, cancelled ? "cancelled" : ok ? "passed" : "failed", text, System.currentTimeMillis()-start, exit);
         } catch (Exception e) { add(name, cancelled ? "cancelled" : "failed", e.toString(), System.currentTimeMillis()-start, -1); }

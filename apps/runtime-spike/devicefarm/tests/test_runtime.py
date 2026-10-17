@@ -166,6 +166,15 @@ def test_runtime():
         metadata["failedChecks"] = [c["name"] for c in report["checks"] if c["status"] == "failed"]
         metadata["notRunChecks"] = [c["name"] for c in report["checks"] if c["status"] == "not_run"]
         save_metadata()
+        # Recover the completed app-written report after process death; do not rerun probes.
+        adb("shell", "am", "force-stop", package)
+        adb("shell", "am", "start", "-W", "-n", package + "/dev.phoneuse.spike.MainActivity")
+        recovered = json.loads(
+            adb("exec-out", "run-as", package, "cat", "files/report.json").stdout
+        )
+        assert recovered == report, "Completed report changed or disappeared after restart"
+        metadata["completedReportRestart"] = "passed"
+        save_metadata()
         # A provider PASSED status must never hide a failed runtime probe.
         assert not metadata["failedChecks"], "Runtime probes failed; inspect app-report.json"
     except Exception as error:
