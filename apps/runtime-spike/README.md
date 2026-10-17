@@ -1,0 +1,63 @@
+# Android runtime feasibility APK
+
+This is a standalone research harness. It does not change phone-use's Python MCP
+tools or require a model key. Build only on the existing AWS Linux host. No Gradle,
+local Android SDK, desktop UI, relay, model inference, or personal files are involved.
+
+The APK intentionally uses the Android platform UI and a small NDK supervisor.
+Each command runs as the app UID, with a time limit and task-owned process group.
+The supervisor is not a security sandbox; descendants that deliberately escape
+their process group are outside this first prototype's cancellation guarantee.
+
+## Build on AWS
+
+Use an isolated checkout and output directory outside Git. Prerequisites are the
+existing Docker, Python 3.11+, JDK 17, SDK platform/build-tools 36 and NDK 29.0.14206865.
+The package preparation script downloads Ubuntu Noble packages through APT's signed
+repository verification, extracts them without running maintainer scripts and records
+package versions/hashes. It is a curated userspace fixture, not a bootable Ubuntu OS.
+
+```sh
+bash apps/runtime-spike/prepare-runtime.sh /home/saurav/builds/phone-use-phase0/runtime
+python3 apps/runtime-spike/pack.py /home/saurav/builds/phone-use-phase0/runtime/amd64/root /home/saurav/builds/phone-use-phase0/runtime/amd64/pack
+python3 apps/runtime-spike/build.py --sdk /home/saurav/Android/Sdk --runtime /home/saurav/builds/phone-use-phase0/runtime/amd64/pack --out /home/saurav/builds/phone-use-phase0/artifacts --abi x86_64 --target 28
+```
+
+Repeat the pack/build for `arm64` / `arm64-v8a` and both targets 28 and 36.
+Builds are debug-signed with a task-local throwaway key outside source. Do not ship
+these as a production app. The build embeds its source commit and runtime manifest;
+APK hashes are recorded in the external test report. APT versions are recorded but
+not yet pinned to a snapshot; retain packages.txt and the downloaded packages.
+
+## Test on the dedicated AWS emulator
+
+Always use an explicit serial. Never operate the existing reviewer emulator.
+
+```sh
+adb -s emulator-5580 install /home/saurav/builds/phone-use-phase0/artifacts/runtime-spike-x86_64-target28.apk
+adb -s emulator-5580 shell am start -n dev.phoneuse.spike.legacy/dev.phoneuse.spike.MainActivity --ez runDiagnostics true
+adb -s emulator-5580 exec-out run-as dev.phoneuse.spike.legacy cat files/report.json
+```
+
+`run-as` reads the diagnostic report only. Executable tests are launched by the
+Activity, never by ADB shell. The app also has Run, Cancel and Export buttons.
+It persists each result atomically and labels a previously running report interrupted
+on restart. Leaving/destroying the Activity cancels work; persistent background
+execution is deliberately outside this initial probe.
+
+Checks explicitly distinguish `passed`, `failed`, `cancelled`, and `not_run`.
+An expected timeout is passing only when the supervisor returns 124. Codex protocol
+success requires an actual initialize response, not just exit code zero.
+
+## Boundaries
+
+- Runtime files are bounded, hashed and extracted to private staging before activation.
+  Update rollback, corrupt-pack tests, low-space tests and hostile symlink chains still
+  need a dedicated fault-injection suite before use with downloaded/user-supplied packs.
+- Only bundled, APK-signed fixture assets are accepted. There is no arbitrary pack import.
+- No credentials are loaded; cloud/authenticated agent tasks remain not run.
+- x86_64 emulator findings cannot establish ARM64/JIT or current Android compatibility.
+- Android 11 can compare target-dependent W^X behavior, but cannot validate Android 16
+  lifecycle, kernel or distribution behavior merely by setting targetSdk 36.
+- Native execution is scoped by the Android app sandbox. PRoot, if tested, only changes
+  filesystem views and is not additional isolation between agents and app credentials.
