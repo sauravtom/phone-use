@@ -11,9 +11,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--apks", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--targets", type=int, nargs="+", choices=(28, 36), default=(28, 36))
     args = parser.parse_args()
     records = {}
-    for target in (28, 36):
+    for target in args.targets:
         apk = args.apks / f"runtime-spike-arm64-v8a-target{target}.apk"
         with apk.open("rb") as stream:
             digest = hashlib.file_digest(stream, "sha256").hexdigest()

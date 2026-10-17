@@ -162,6 +162,8 @@ public class MainActivity extends Activity {
             prootCheck("proot_child_chain", 40, null, "/usr/bin/bash", "-c", "set -eu; /usr/bin/python3 -c 'print(789)'; /usr/bin/git --version");
             prootCheck("proot_file_roundtrip", 20, null, "/usr/bin/python3", "-c",
                 "import json,pathlib; p=pathlib.Path('/tmp/fixture with spaces.json'); p.write_text(json.dumps({'ok':True})); assert json.loads(p.read_text())['ok']; print('FILE_ROUNDTRIP_OK')");
+            prootCheck("proot_shebang_symlink", 20, null, "/usr/bin/python3", "-c",
+                "import pathlib,tempfile,subprocess; d=pathlib.Path(tempfile.mkdtemp()); p=d/'script with spaces'; p.write_text('#!/bin/sh\\nprintf SHEBANG_OK\\n'); p.chmod(0o700); link=d/'linked script'; link.symlink_to(p); assert subprocess.check_output([str(link)])==b'SHEBANG_OK'; print('SHEBANG_SYMLINK_EXEC_OK')");
             prootCheck("proot_git_workflow", 40, null, "/usr/bin/bash", "-c",
                 "set -eu; repo=$(mktemp -d /tmp/git-fixture.XXXXXX); git init \"$repo\"; cd \"$repo\"; printf 'before\\n' > 'file with spaces.txt'; git add .; git -c user.name=Spike -c user.email=spike@example.invalid -c commit.gpgsign=false commit -m fixture; printf 'after\\n' > 'file with spaces.txt'; git diff --exit-code > /tmp/spike-diff && exit 9; git diff; git clone --no-hardlinks \"$repo\" \"$repo-clone\"; test \"$(cat \"$repo-clone/file with spaces.txt\")\" = before; printf 'GIT_WORKFLOW_OK\\n'");
             configureDns();

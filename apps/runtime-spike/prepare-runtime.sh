@@ -29,6 +29,11 @@ for arch in amd64 arm64; do
     done > /out/packages.txt
     mkdir -p /out/root/etc/ssl/certs /out/root/tmp /out/root/dev /out/root/proc
     cat /out/root/usr/share/ca-certificates/mozilla/*.crt > /out/root/etc/ssl/certs/ca-certificates.crt
+    # Package extraction does not run the shell-alternative maintainer scripts.
+    # Git helpers and shebangs require /bin/sh; /bin is the packaged usr/bin link.
+    if [[ ! -e /out/root/usr/bin/sh && ! -L /out/root/usr/bin/sh ]]; then
+      ln -s bash /out/root/usr/bin/sh
+    fi
     # No maintainer scripts or foreign-architecture binaries are executed.
     chown -R '"$(id -u):$(id -g)"' /out
   '
